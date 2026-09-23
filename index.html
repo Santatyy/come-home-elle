@@ -374,6 +374,7 @@
     let player = null;
     let songOn = false;
     let opened = false;
+    let pausedAt = 0;
 
     const setSongOn = on => {
       songOn = on;
@@ -428,9 +429,13 @@
     musicBtn.addEventListener("click", () => {
       if (!player || !player.playVideo) return;
       if (songOn) {
+        pausedAt = player.getCurrentTime();
         player.pauseVideo();
         setSongOn(false);
       } else {
+        // The looping player can jump back to the start on resume,
+        // so return to where it was paused
+        player.seekTo(pausedAt, true);
         player.playVideo();
         setSongOn(true);
       }
