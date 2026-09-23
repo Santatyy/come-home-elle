@@ -195,45 +195,6 @@
       background: #c2185b;
       border: 3px solid #fff;
     }
-    .music {
-      position: fixed;
-      right: 16px;
-      bottom: 16px;
-      width: 52px;
-      height: 52px;
-      border: none;
-      border-radius: 50%;
-      background: #fff;
-      color: #c2185b;
-      font-size: 1.5rem;
-      cursor: pointer;
-      box-shadow: 0 6px 16px rgba(194, 24, 91, 0.3);
-      transition: transform 0.3s ease;
-      z-index: 20;
-    }
-    .song-status {
-      position: fixed;
-      right: 16px;
-      bottom: 78px;
-      max-width: 260px;
-      margin: 0;
-      padding: 8px 12px;
-      border-radius: 10px;
-      background: #fff;
-      color: #c2185b;
-      font-size: 0.85rem;
-      box-shadow: 0 4px 12px rgba(194, 24, 91, 0.25);
-      z-index: 20;
-    }
-    .music:hover {
-      transform: scale(1.1);
-    }
-    .music.playing {
-      animation: spin 4s linear infinite;
-    }
-    @keyframes spin {
-      to { transform: rotate(360deg); }
-    }
     .rain {
       position: fixed;
       inset: 0;
@@ -304,10 +265,7 @@
   </div>
   <div class="gallery" id="gallery"></div>
   <p class="love"><span>I love you Elle, I want to make future with you.</span></p>
-  <audio id="song" src="Mitski%20-%20My%20Love%20Mine%20All%20Mine%20(Official%20Lyric%20Video).mp3" loop preload="auto"></audio>
-  <p class="song-status" id="song-status" hidden></p>
-  <button class="music" id="music" aria-label="Play or pause music">♪</button>
-  <div class="rain" id="rain" aria-hidden="true"></div>
+  <audio id="song" src="Mitski%20-%20My%20Love%20Mine%20All%20Mine%20(Official%20Lyric%20Video).mp3" loop preload="auto"></audio>  <div class="rain" id="rain" aria-hidden="true"></div>
   <button class="intro" id="intro">For Elle 💖</button>
   <script>
     // Hearts rain down for a couple of seconds, together with the song
@@ -359,14 +317,9 @@
     }
 
     // Background song. Browsers block sound until the visitor taps,
-    // so the opening screen collects that tap and starts song + rain together.
+    // so an opening screen collects that tap and starts song + rain together.
     const song = document.getElementById("song");
-    const musicBtn = document.getElementById("music");
     const intro = document.getElementById("intro");
-    const volume = document.getElementById("volume");
-    const syncBtn = () => musicBtn.classList.toggle("playing", !song.paused);
-    song.addEventListener("play", syncBtn);
-    song.addEventListener("pause", syncBtn);
 
     let opened = false;
     const open = () => {
@@ -379,27 +332,27 @@
     song.addEventListener("loadedmetadata", () => {
       if (song.paused) song.currentTime = 0.4;
     }, { once: true });
-    // Show why the browser refused to play, so the problem can be traced
-    const songStatus = document.getElementById("song-status");
-    const tryPlay = () => song.play()
-      .then(() => { songStatus.hidden = true; })
-      .catch(e => {
-        songStatus.textContent = "Music blocked (" + e.name + "). Tap ♪ to try again.";
-        songStatus.hidden = false;
-      });
-    song.addEventListener("error", () => {
-      songStatus.textContent = "Music file failed to load (code " + song.error.code + ").";
-      songStatus.hidden = false;
-    });
+    // If the browser allows autoplay, skip the opening screen
+    song.play().then(open).catch(() => {});
+    // If the tap on "For Elle" still gets blocked, keep trying on later taps
+    const retry = () => {
+      if (!song.paused) return stopRetry();
+      song.play().then(stopRetry).catch(() => {});
+    };
+    const stopRetry = () => {
+      document.removeEventListener("click", retry);
+      document.removeEventListener("keydown", retry);
+    };
     intro.addEventListener("click", () => {
-      tryPlay();
+      song.play().catch(() => {
+        document.addEventListener("click", retry);
+        document.addEventListener("keydown", retry);
+      });
       open();
-    });
-    musicBtn.addEventListener("click", () => {
-      song.paused ? tryPlay() : song.pause();
     });
 
     // Volume slider under the heart, remembered in this browser
+    const volume = document.getElementById("volume");
     try {
       const saved = localStorage.getItem("volume");
       if (saved !== null) volume.value = saved;
