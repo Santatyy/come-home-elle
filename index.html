@@ -204,7 +204,7 @@
       gap: 14px;
     }
     .volume {
-      --fill: 50%;
+      --fill: 40%;
       -webkit-appearance: none;
       appearance: none;
       width: clamp(70px, 12vw, 130px);
@@ -302,7 +302,7 @@
         </svg>
         <p class="heart-msg">I want to move to the next step with you. Not just that. Want to bring you out on a date. Buy you gifts. Want to cook for you. Want to get rich with you. My money every single penny will share with you. Want to live with you. Be your partner my love.</p>
       </div>
-      <input type="range" id="volume" class="volume" min="0" max="100" value="50" aria-label="Volume">
+      <input type="range" id="volume" class="volume" min="0" max="100" value="40" aria-label="Volume">
     </div>
     <img src="elle.png" alt="Elle">
   </div>
@@ -394,21 +394,14 @@
       open();
     });
 
-    // Volume slider under the heart, remembered in this browser
+    // Volume slider under the heart; every visit starts at the default in the HTML
     const volume = document.getElementById("volume");
-    try {
-      const saved = localStorage.getItem("volume");
-      if (saved !== null) volume.value = saved;
-    } catch (e) {}
     const applyVolume = () => {
       song.volume = volume.value / 100;
       volume.style.setProperty("--fill", `${volume.value}%`);
     };
     applyVolume();
-    volume.addEventListener("input", () => {
-      applyVolume();
-      try { localStorage.setItem("volume", volume.value); } catch (e) {}
-    });
+    volume.addEventListener("input", applyVolume);
 
     // Same speed for every row regardless of its width
     window.addEventListener("load", () => {
