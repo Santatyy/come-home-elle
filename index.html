@@ -233,24 +233,6 @@
       color: #e91e63;
       animation: fall linear forwards;
     }
-    .yt {
-      position: fixed;
-      left: -9999px;
-      top: 0;
-      width: 200px;
-      height: 200px;
-      opacity: 0;
-      pointer-events: none;
-    }
-    .yt.cover {
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      opacity: 0.01;
-      pointer-events: auto;
-      cursor: pointer;
-      z-index: 50;
-    }
     .intro {
       position: fixed;
       inset: 0;
@@ -308,7 +290,7 @@
   </div>
   <div class="gallery" id="gallery"></div>
   <p class="love"><span>I love you Elle, I want to make future with you.</span></p>
-  <div class="yt" aria-hidden="true"><div id="yt"></div></div>
+  <audio id="song" src="Mitski%20-%20My%20Love%20Mine%20All%20Mine%20(Official%20Lyric%20Video).mp3" loop preload="auto"></audio>
   <button class="music" id="music" aria-label="Play or pause music">♪</button>
   <div class="rain" id="rain" aria-hidden="true"></div>
   <button class="intro" id="intro">For Elle 💖</button>
@@ -361,84 +343,33 @@
       gallery.appendChild(row);
     }
 
-    // Background song from the official YouTube video.
-    // Browsers only allow sound when the tap lands inside the YouTube frame
-    // itself, so once the player is ready it is stretched invisibly over the
-    // opening screen: the tap on "For Elle" is really a tap on the player.
-    // As soon as that tap happens, the player is tucked away off screen.
-    const VIDEO_ID = "CwGbMYLjIpQ";
+    // Background song. Browsers block sound until the visitor taps,
+    // so the opening screen collects that tap and starts song + rain together.
+    const song = document.getElementById("song");
     const musicBtn = document.getElementById("music");
     const intro = document.getElementById("intro");
     const volume = document.getElementById("volume");
-    const ytBox = document.querySelector(".yt");
-    let player = null;
-    let songOn = false;
-    let opened = false;
-    let pausedAt = 0;
+    const syncBtn = () => musicBtn.classList.toggle("playing", !song.paused);
+    song.addEventListener("play", syncBtn);
+    song.addEventListener("pause", syncBtn);
 
-    const setSongOn = on => {
-      songOn = on;
-      musicBtn.classList.toggle("playing", on);
-    };
+    let opened = false;
     const open = () => {
       if (opened) return;
       opened = true;
-      ytBox.classList.remove("cover");
       intro.classList.add("hidden");
       startRain();
     };
-
-    window.onYouTubeIframeAPIReady = () => {
-      player = new YT.Player("yt", {
-        videoId: VIDEO_ID,
-        width: "100%",
-        height: "100%",
-        playerVars: { controls: 0, loop: 1, playlist: VIDEO_ID, playsinline: 1 },
-        events: {
-          onReady: () => {
-            player.setVolume(Number(volume.value));
-            if (opened) {
-              // Tapped before the player was ready: best effort
-              player.playVideo();
-            } else {
-              ytBox.classList.add("cover");
-            }
-          }
-        }
-      });
-    };
-    const ytScript = document.createElement("script");
-    ytScript.src = "https://www.youtube.com/iframe_api";
-    document.head.appendChild(ytScript);
-
-    // A tap inside the YouTube frame moves focus to it and blurs this window
-    window.addEventListener("blur", () => {
-      setTimeout(() => {
-        if (!opened && document.activeElement && document.activeElement.tagName === "IFRAME") {
-          setSongOn(true);
-          open();
-        }
-      }, 0);
-    });
-    // Fallback when the tap arrives before the player covers the screen
+    // Skip the short silence at the start of the file
+    song.addEventListener("loadedmetadata", () => {
+      if (song.paused) song.currentTime = 0.4;
+    }, { once: true });
     intro.addEventListener("click", () => {
-      setSongOn(true);
-      if (player && player.playVideo) player.playVideo();
+      song.play().catch(() => {});
       open();
     });
     musicBtn.addEventListener("click", () => {
-      if (!player || !player.playVideo) return;
-      if (songOn) {
-        pausedAt = player.getCurrentTime();
-        player.pauseVideo();
-        setSongOn(false);
-      } else {
-        // The looping player can jump back to the start on resume,
-        // so return to where it was paused
-        player.seekTo(pausedAt, true);
-        player.playVideo();
-        setSongOn(true);
-      }
+      song.paused ? song.play() : song.pause();
     });
 
     // Volume slider under the heart, remembered in this browser
@@ -447,7 +378,7 @@
       if (saved !== null) volume.value = saved;
     } catch (e) {}
     const applyVolume = () => {
-      if (player && player.setVolume) player.setVolume(Number(volume.value));
+      song.volume = volume.value / 100;
       volume.style.setProperty("--fill", `${volume.value}%`);
     };
     applyVolume();
