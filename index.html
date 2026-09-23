@@ -157,6 +157,46 @@
         margin: 24px auto 0;
       }
     }
+    .heart-wrap {
+      position: relative;
+      display: flex;
+      cursor: pointer;
+      outline: none;
+    }
+    .heart-msg {
+      position: absolute;
+      bottom: calc(100% + 14px);
+      left: 50%;
+      width: min(320px, 80vw);
+      margin: 0;
+      padding: 14px 18px;
+      border-radius: 16px;
+      background: #fff;
+      color: #5d1036;
+      font: 500 1.3rem/1.35 "Caveat", cursive;
+      text-align: center;
+      box-shadow: 0 10px 28px rgba(194, 24, 91, 0.3);
+      opacity: 0;
+      visibility: hidden;
+      transform: translate(-50%, 8px) scale(0.95);
+      transition: opacity 0.4s ease, transform 0.4s ease, visibility 0.4s;
+      z-index: 15;
+    }
+    .heart-msg::after {
+      content: "";
+      position: absolute;
+      top: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      border: 9px solid transparent;
+      border-top-color: #fff;
+    }
+    .heart-wrap:hover .heart-msg,
+    .heart-wrap:focus .heart-msg {
+      opacity: 1;
+      visibility: visible;
+      transform: translate(-50%, 0) scale(1);
+    }
     .center {
       display: flex;
       flex-direction: column;
@@ -256,9 +296,12 @@
   <div class="couple">
     <img class="pann" src="pann.png" alt="Pann">
     <div class="center">
-      <svg class="heart" viewBox="0 0 24 24" aria-hidden="true">
-        <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
-      </svg>
+      <div class="heart-wrap" tabindex="0">
+        <svg class="heart" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+        </svg>
+        <p class="heart-msg">I want to move to the next step with you. Not just that. Want to bring you out on a date. Buy you gifts. Want to cook for you. Want to get rich with you. My money every single penny will share with you. Want to live with you. Be your partner my love.</p>
+      </div>
       <input type="range" id="volume" class="volume" min="0" max="100" value="50" aria-label="Volume">
     </div>
     <img src="elle.png" alt="Elle">
