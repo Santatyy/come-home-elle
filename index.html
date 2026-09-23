@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Come Home Elle</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500&family=Great+Vibes&display=swap" rel="stylesheet">
+  <style>
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: #ffe4ec;
+      font-family: "Segoe UI", system-ui, sans-serif;
+    }
+    h1 {
+      margin: 0;
+      padding: 8vh 16px 0;
+      text-align: center;
+      color: #c2185b;
+      font-family: "Great Vibes", cursive;
+      font-weight: 400;
+      font-size: clamp(2.5rem, 8vw, 5.5rem);
+    }
+    h1 span {
+      display: inline-block;
+      cursor: pointer;
+      transition: transform 0.5s ease;
+    }
+    h1 span:hover {
+      transform: scale(1.15);
+    }
+    .couple {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: clamp(12px, 4vw, 48px);
+      padding: 5vh 16px;
+    }
+    .couple img {
+      width: clamp(110px, 28vw, 260px);
+      aspect-ratio: 1;
+      object-fit: cover;
+      border-radius: 50%;
+      border: 5px solid #fff;
+      box-shadow: 0 8px 24px rgba(194, 24, 91, 0.25);
+    }
+    .couple img.pann { object-position: 52% 40%; }
+    .heart {
+      width: clamp(40px, 9vw, 80px);
+      fill: #e91e63;
+      animation: beat 1.2s ease-in-out infinite;
+    }
+    .gallery {
+      padding-bottom: 6vh;
+      overflow: hidden;
+    }
+    .row {
+      overflow: hidden;
+      padding: 10px 0;
+    }
+    .track {
+      display: flex;
+      width: max-content;
+      animation: slide 60s linear infinite;
+    }
+    .track img {
+      height: clamp(140px, 22vw, 260px);
+      width: auto;
+      margin-right: 14px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(194, 24, 91, 0.2);
+      transition: transform 0.4s ease;
+    }
+    .track img:hover {
+      transform: scale(1.08);
+    }
+    @keyframes slide {
+      from { transform: translateX(0); }
+      to { transform: translateX(-50%); }
+    }
+    .love {
+      margin: 0;
+      padding: 2vh 16px 14vh;
+      text-align: center;
+      color: #c2185b;
+      font: 400 clamp(2rem, 6vw, 4rem)/1.3 "Great Vibes", cursive;
+    }
+    .love span {
+      display: inline-block;
+      cursor: pointer;
+      transition: transform 0.5s ease;
+    }
+    .love span:hover {
+      transform: scale(1.1);
+    }
+    .note {
+      position: absolute;
+      top: 24px;
+      left: 12px;
+      width: 270px;
+      padding: 14px 16px 18px;
+      background: #fff8b8;
+      border-radius: 2px 2px 14px 2px;
+      box-shadow: 0 10px 20px rgba(194, 24, 91, 0.2);
+      transform: rotate(-3deg);
+      transition: transform 0.4s ease;
+      z-index: 10;
+    }
+    .note.right {
+      left: auto;
+      right: 12px;
+      transform: rotate(3deg);
+    }
+    .note:hover,
+    .note:focus-within {
+      transform: rotate(0deg) scale(1.03);
+    }
+    .note::before {
+      content: "";
+      position: absolute;
+      top: -10px;
+      left: 50%;
+      width: 80px;
+      height: 22px;
+      transform: translateX(-50%) rotate(2deg);
+      background: rgba(255, 182, 206, 0.8);
+    }
+    .note h2 {
+      margin: 0 0 6px;
+      font: 500 1.6rem "Caveat", cursive;
+      color: #c2185b;
+    }
+    .note-body {
+      max-height: 340px;
+      overflow-y: auto;
+      padding-right: 4px;
+      outline: none;
+      background: repeating-linear-gradient(transparent 0 27px, rgba(194, 24, 91, 0.2) 27px 28px);
+      background-attachment: local;
+      font: 500 1.25rem/28px "Caveat", cursive;
+      color: #5d1036;
+      scrollbar-width: thin;
+      scrollbar-color: #f48fb1 transparent;
+    }
+    .note-body p {
+      margin: 0 0 28px;
+    }
+    .note-body p:last-child {
+      margin-bottom: 0;
+    }
+    @media (max-width: 1350px) {
+      .note,
+      .note.right {
+        position: static;
+        margin: 24px auto 0;
+      }
+    }
+    .center {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+    }
+    .volume {
+      --fill: 50%;
+      -webkit-appearance: none;
+      appearance: none;
+      width: clamp(70px, 12vw, 130px);
+      height: 8px;
+      border-radius: 4px;
+      background: linear-gradient(to right, #e91e63 var(--fill), #fff var(--fill));
+      box-shadow: 0 2px 6px rgba(194, 24, 91, 0.25);
+      cursor: pointer;
+      outline: none;
+    }
+    .volume::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: #c2185b;
+      border: 3px solid #fff;
+      box-shadow: 0 2px 6px rgba(194, 24, 91, 0.4);
+      transition: transform 0.2s ease;
+    }
+    .volume::-webkit-slider-thumb:hover {
+      transform: scale(1.2);
+    }
+    .volume::-moz-range-thumb {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: #c2185b;
+      border: 3px solid #fff;
+    }
+    .music {
+      position: fixed;
+      right: 16px;
+      bottom: 16px;
+      width: 52px;
+      height: 52px;
+      border: none;
+      border-radius: 50%;
+      background: #fff;
+      color: #c2185b;
+      font-size: 1.5rem;
+      cursor: pointer;
+      box-shadow: 0 6px 16px rgba(194, 24, 91, 0.3);
+      transition: transform 0.3s ease;
+      z-index: 20;
+    }
+    .music:hover {
+      transform: scale(1.1);
+    }
+    .music.playing {
+      animation: spin 4s linear infinite;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    .rain {
+      position: fixed;
+      inset: 0;
+      overflow: hidden;
+      pointer-events: none;
+      z-index: 30;
+    }
+    .rain span {
+      position: absolute;
+      top: -40px;
+      color: #e91e63;
+      animation: fall linear forwards;
+    }
+    .intro {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      border: none;
+      background: #ffe4ec;
+      color: #c2185b;
+      font: 400 clamp(2.5rem, 8vw, 5rem) "Great Vibes", cursive;
+      cursor: pointer;
+      z-index: 40;
+      transition: opacity 0.6s ease, visibility 0.6s;
+    }
+    .intro.hidden {
+      opacity: 0;
+      visibility: hidden;
+    }
+    @keyframes fall {
+      to { transform: translateY(110vh) rotate(var(--spin)); opacity: 0.2; }
+    }
+    @keyframes beat {
+      0%, 100% { transform: scale(1); }
+      15% { transform: scale(1.2); }
+      30% { transform: scale(1); }
+      45% { transform: scale(1.15); }
+    }
+  </style>
+</head>
+<body>
+  <div class="note">
+    <h2>I sincerely apologize ♡</h2>
+    <div class="note-body" tabindex="0">
+      <p>Elle, my weakest points are that I can be clumsy, and I'm still inexperienced at a lot of things. Those are my flaws.</p>
+      <p>But I don't give up. I learn fast, I'm not afraid to be wrong, and I don't let ego get in the way of changing when I learn something new. I'm not scared of hard things, and I don't take my anger out on you. This is just part of who I am.</p>
+      <p>What I can promise is to keep growing, and I want to become someone you can always count on.</p>
+    </div>
+  </div>
+  <div class="note right">
+    <h2>How much I understand you ♡</h2>
+    <div class="note-body" tabindex="0">
+      <p>What Elle wants the most is someone to spoil her, baby her, someone that can take care of her, always be there for her. Someone to spoil her after a tiring day and compliment her a lot.</p>
+      <p>Elle worked so hard. I'm so proud of Elle she got this far at this age. Elle is humble. Elle got the kindest and the strongest heart. Elle cares about poor people. Shares her food with co-workers, does donations, helps with finances at home.</p>
+      <p>Elle is so devoted, loyal and so patient to Pann. Always tells how she truly feels. Always gives Pann chances, even when repeating the same mistake.</p>
+    </div>
+  </div>
+  <h1><span>Come home my baby Elle.</span></h1>
+  <div class="couple">
+    <img class="pann" src="pann.png" alt="Pann">
+    <div class="center">
+      <svg class="heart" viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+      </svg>
+      <input type="range" id="volume" class="volume" min="0" max="100" value="50" aria-label="Volume">
+    </div>
+    <img src="elle.png" alt="Elle">
+  </div>
+  <div class="gallery" id="gallery"></div>
+  <p class="love"><span>I love you Elle, I want to make future with you.</span></p>
+  <audio id="song" src="song.mp3" loop preload="auto"></audio>
+  <button class="music" id="music" aria-label="Play or pause music">♪</button>
+  <div class="rain" id="rain" aria-hidden="true"></div>
+  <button class="intro" id="intro">For Elle 💖</button>
+  <script>
+    // Hearts rain down for a couple of seconds, together with the song
+    const rain = document.getElementById("rain");
+    const HEARTS = ["❤", "♡", "💕", "💖", "💗"];
+    const startRain = () => {
+      const rainTimer = setInterval(() => {
+        const h = document.createElement("span");
+        h.textContent = HEARTS[Math.floor(Math.random() * HEARTS.length)];
+        h.style.left = `${Math.random() * 100}vw`;
+        h.style.fontSize = `${14 + Math.random() * 26}px`;
+        h.style.animationDuration = `${3 + Math.random() * 3}s`;
+        h.style.setProperty("--spin", `${Math.random() * 120 - 60}deg`);
+        h.addEventListener("animationend", () => h.remove());
+        rain.appendChild(h);
+      }, 80);
+      setTimeout(() => clearInterval(rainTimer), 2000);
+    };
+
+    const files = ["image.png"];
+    for (let i = 1; i <= 35; i++) files.push(`image${i}.png`);
+    files.push(
+      "11331014636_128736949265057_1788254326340.png",
+      "11331014636_76165410142500_1788658887983.png",
+      "11331014636_76165410142500_1789657250730.png",
+      "11331014636_76165410142500_1789657306538.png"
+    );
+
+    const PER_ROW = 7;
+    const SPEED = 40; // px per second
+    const gallery = document.getElementById("gallery");
+
+    for (let i = 0; i < files.length; i += PER_ROW) {
+      const row = document.createElement("div");
+      row.className = "row";
+      const track = document.createElement("div");
+      track.className = "track";
+      const group = files.slice(i, i + PER_ROW);
+      // Each half holds the group twice so it is wider than the screen;
+      // the two identical halves make the loop seamless at -50%
+      for (const src of [...group, ...group, ...group, ...group]) {
+        const img = document.createElement("img");
+        img.src = src;
+        img.alt = "";
+        track.appendChild(img);
+      }
+      row.appendChild(track);
+      gallery.appendChild(row);
+    }
+
+    // Background song. Browsers block sound until the visitor taps,
+    // so an opening screen collects that tap and starts song + rain together.
+    const song = document.getElementById("song");
+    const musicBtn = document.getElementById("music");
+    const intro = document.getElementById("intro");
+    const syncBtn = () => musicBtn.classList.toggle("playing", !song.paused);
+    song.addEventListener("play", syncBtn);
+    song.addEventListener("pause", syncBtn);
+
+    let opened = false;
+    const open = () => {
+      if (opened) return;
+      opened = true;
+      intro.classList.add("hidden");
+      startRain();
+    };
+    // Skip the short silence at the start of the file
+    song.addEventListener("loadedmetadata", () => {
+      if (song.paused) song.currentTime = 0.4;
+    }, { once: true });
+    // If the browser allows autoplay, skip the opening screen
+    song.play().then(open).catch(() => {});
+    intro.addEventListener("click", () => {
+      song.play().catch(() => {});
+      open();
+    });
+    musicBtn.addEventListener("click", () => {
+      song.paused ? song.play() : song.pause();
+    });
+
+    // Volume slider under the heart, remembered in this browser
+    const volume = document.getElementById("volume");
+    try {
+      const saved = localStorage.getItem("volume");
+      if (saved !== null) volume.value = saved;
+    } catch (e) {}
+    const applyVolume = () => {
+      song.volume = volume.value / 100;
+      volume.style.setProperty("--fill", `${volume.value}%`);
+    };
+    applyVolume();
+    volume.addEventListener("input", () => {
+      applyVolume();
+      try { localStorage.setItem("volume", volume.value); } catch (e) {}
+    });
+
+    // Same speed for every row regardless of its width
+    window.addEventListener("load", () => {
+      document.querySelectorAll(".track").forEach(track => {
+        const loopWidth = track.scrollWidth / 2;
+        track.style.animationDuration = `${loopWidth / SPEED}s`;
+      });
+    });
+  </script>
+</body>
+</html>
