@@ -233,6 +233,15 @@
       color: #e91e63;
       animation: fall linear forwards;
     }
+    .yt {
+      position: fixed;
+      left: -9999px;
+      top: 0;
+      width: 200px;
+      height: 200px;
+      opacity: 0;
+      pointer-events: none;
+    }
     .intro {
       position: fixed;
       inset: 0;
@@ -290,7 +299,7 @@
   </div>
   <div class="gallery" id="gallery"></div>
   <p class="love"><span>I love you Elle, I want to make future with you.</span></p>
-  <audio id="song" src="song.mp3" loop preload="auto"></audio>
+  <div class="yt" aria-hidden="true"><div id="yt"></div></div>
   <button class="music" id="music" aria-label="Play or pause music">♪</button>
   <div class="rain" id="rain" aria-hidden="true"></div>
   <button class="intro" id="intro">For Elle 💖</button>
@@ -343,44 +352,63 @@
       gallery.appendChild(row);
     }
 
-    // Background song. Browsers block sound until the visitor taps,
-    // so an opening screen collects that tap and starts song + rain together.
-    const song = document.getElementById("song");
+    // Background song from the official YouTube video, played by a hidden
+    // player. Browsers block sound until the visitor taps, so the opening
+    // screen collects that tap and starts song + rain together.
+    const VIDEO_ID = "CwGbMYLjIpQ";
     const musicBtn = document.getElementById("music");
     const intro = document.getElementById("intro");
-    const syncBtn = () => musicBtn.classList.toggle("playing", !song.paused);
-    song.addEventListener("play", syncBtn);
-    song.addEventListener("pause", syncBtn);
+    const volume = document.getElementById("volume");
+    let player = null;
+    let wantPlay = false;
 
-    let opened = false;
-    const open = () => {
-      if (opened) return;
-      opened = true;
+    window.onYouTubeIframeAPIReady = () => {
+      player = new YT.Player("yt", {
+        videoId: VIDEO_ID,
+        playerVars: { controls: 0, loop: 1, playlist: VIDEO_ID, playsinline: 1 },
+        events: {
+          onReady: () => {
+            player.setVolume(Number(volume.value));
+            if (wantPlay) player.playVideo();
+          },
+          onStateChange: e => {
+            musicBtn.classList.toggle("playing", e.data === YT.PlayerState.PLAYING);
+          }
+        }
+      });
+    };
+    const ytScript = document.createElement("script");
+    ytScript.src = "https://www.youtube.com/iframe_api";
+    document.head.appendChild(ytScript);
+
+    const playSong = () => {
+      wantPlay = true;
+      if (player && player.playVideo) player.playVideo();
+    };
+    const isPlaying = () =>
+      player && player.getPlayerState && player.getPlayerState() === YT.PlayerState.PLAYING;
+
+    intro.addEventListener("click", () => {
+      playSong();
       intro.classList.add("hidden");
       startRain();
-    };
-    // Skip the short silence at the start of the file
-    song.addEventListener("loadedmetadata", () => {
-      if (song.paused) song.currentTime = 0.4;
-    }, { once: true });
-    // If the browser allows autoplay, skip the opening screen
-    song.play().then(open).catch(() => {});
-    intro.addEventListener("click", () => {
-      song.play().catch(() => {});
-      open();
     });
     musicBtn.addEventListener("click", () => {
-      song.paused ? song.play() : song.pause();
+      if (isPlaying()) {
+        wantPlay = false;
+        player.pauseVideo();
+      } else {
+        playSong();
+      }
     });
 
     // Volume slider under the heart, remembered in this browser
-    const volume = document.getElementById("volume");
     try {
       const saved = localStorage.getItem("volume");
       if (saved !== null) volume.value = saved;
     } catch (e) {}
     const applyVolume = () => {
-      song.volume = volume.value / 100;
+      if (player && player.setVolume) player.setVolume(Number(volume.value));
       volume.style.setProperty("--fill", `${volume.value}%`);
     };
     applyVolume();
