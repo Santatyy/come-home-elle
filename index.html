@@ -242,6 +242,15 @@
       opacity: 0;
       pointer-events: none;
     }
+    .yt.cover {
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      opacity: 0.01;
+      pointer-events: auto;
+      cursor: pointer;
+      z-index: 50;
+    }
     .intro {
       position: fixed;
       inset: 0;
@@ -352,27 +361,47 @@
       gallery.appendChild(row);
     }
 
-    // Background song from the official YouTube video, played by a hidden
-    // player. Browsers block sound until the visitor taps, so the opening
-    // screen collects that tap and starts song + rain together.
+    // Background song from the official YouTube video.
+    // Browsers only allow sound when the tap lands inside the YouTube frame
+    // itself, so once the player is ready it is stretched invisibly over the
+    // opening screen: the tap on "For Elle" is really a tap on the player.
+    // As soon as that tap happens, the player is tucked away off screen.
     const VIDEO_ID = "CwGbMYLjIpQ";
     const musicBtn = document.getElementById("music");
     const intro = document.getElementById("intro");
     const volume = document.getElementById("volume");
+    const ytBox = document.querySelector(".yt");
     let player = null;
-    let wantPlay = false;
+    let songOn = false;
+    let opened = false;
+
+    const setSongOn = on => {
+      songOn = on;
+      musicBtn.classList.toggle("playing", on);
+    };
+    const open = () => {
+      if (opened) return;
+      opened = true;
+      ytBox.classList.remove("cover");
+      intro.classList.add("hidden");
+      startRain();
+    };
 
     window.onYouTubeIframeAPIReady = () => {
       player = new YT.Player("yt", {
         videoId: VIDEO_ID,
+        width: "100%",
+        height: "100%",
         playerVars: { controls: 0, loop: 1, playlist: VIDEO_ID, playsinline: 1 },
         events: {
           onReady: () => {
             player.setVolume(Number(volume.value));
-            if (wantPlay) player.playVideo();
-          },
-          onStateChange: e => {
-            musicBtn.classList.toggle("playing", e.data === YT.PlayerState.PLAYING);
+            if (opened) {
+              // Tapped before the player was ready: best effort
+              player.playVideo();
+            } else {
+              ytBox.classList.add("cover");
+            }
           }
         }
       });
@@ -381,24 +410,29 @@
     ytScript.src = "https://www.youtube.com/iframe_api";
     document.head.appendChild(ytScript);
 
-    const playSong = () => {
-      wantPlay = true;
-      if (player && player.playVideo) player.playVideo();
-    };
-    const isPlaying = () =>
-      player && player.getPlayerState && player.getPlayerState() === YT.PlayerState.PLAYING;
-
+    // A tap inside the YouTube frame moves focus to it and blurs this window
+    window.addEventListener("blur", () => {
+      setTimeout(() => {
+        if (!opened && document.activeElement && document.activeElement.tagName === "IFRAME") {
+          setSongOn(true);
+          open();
+        }
+      }, 0);
+    });
+    // Fallback when the tap arrives before the player covers the screen
     intro.addEventListener("click", () => {
-      playSong();
-      intro.classList.add("hidden");
-      startRain();
+      setSongOn(true);
+      if (player && player.playVideo) player.playVideo();
+      open();
     });
     musicBtn.addEventListener("click", () => {
-      if (isPlaying()) {
-        wantPlay = false;
+      if (!player || !player.playVideo) return;
+      if (songOn) {
         player.pauseVideo();
+        setSongOn(false);
       } else {
-        playSong();
+        player.playVideo();
+        setSongOn(true);
       }
     });
 
