@@ -439,6 +439,22 @@
   <audio id="song" src="Mitski%20-%20My%20Love%20Mine%20All%20Mine%20(Official%20Lyric%20Video).mp3" loop preload="auto"></audio>  <div class="rain" id="rain" aria-hidden="true"></div>
   <button class="intro" id="intro">For Elle 💖</button>
   <script>
+    // Discourage casual source viewing: block right-click and the
+    // dev-tools / view-source shortcuts. This only deters; it can't
+    // truly hide the code, which the browser must download to show the page.
+    document.addEventListener("contextmenu", e => e.preventDefault());
+    document.addEventListener("keydown", e => {
+      const c = e.code;
+      const devtools = ["KeyI", "KeyJ", "KeyC"].includes(c);
+      if (c === "F12" ||
+          (e.ctrlKey && e.shiftKey && devtools) ||
+          (e.ctrlKey && c === "KeyU") ||
+          (e.metaKey && e.altKey && (devtools || c === "KeyU"))) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+    }, true);
+
     // Hearts rain down for a couple of seconds, together with the song
     const rain = document.getElementById("rain");
     const HEARTS = ["❤", "♡", "💕", "💖", "💗"];
