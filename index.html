@@ -550,8 +550,43 @@
     // Heart locket opens and closes on click (or Enter/Space)
     const locket = document.getElementById("locket");
     const locketHint = document.getElementById("locket-hint");
+    // Locket sounds, synthesized with Web Audio so no extra file is needed.
+    // They follow the volume slider under the heart.
+    let audioCtx = null;
+    const tone = (freq, start, dur, gain, type = "sine") => {
+      const t = audioCtx.currentTime + start;
+      const osc = audioCtx.createOscillator();
+      const g = audioCtx.createGain();
+      osc.type = type;
+      osc.frequency.value = freq;
+      g.gain.setValueAtTime(0, t);
+      g.gain.linearRampToValueAtTime(gain, t + 0.008);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+      osc.connect(g).connect(audioCtx.destination);
+      osc.start(t);
+      osc.stop(t + dur + 0.05);
+    };
+    const playLocketSound = open => {
+      try {
+        audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+        if (audioCtx.state === "suspended") audioCtx.resume();
+        const level = volume.value / 100;
+        if (level === 0) return;
+        // Metal clasp click
+        tone(open ? 2400 : 1700, 0, 0.045, 0.22 * level, "triangle");
+        tone(open ? 3800 : 2700, 0.012, 0.035, 0.1 * level, "triangle");
+        if (open) {
+          // Sparkling chime as the lid swings open
+          [1046.5, 1318.5, 1568, 2093].forEach((f, i) => {
+            tone(f, 0.12 + i * 0.09, 1.3, 0.16 * level);
+            tone(f * 2, 0.12 + i * 0.09, 0.6, 0.04 * level);
+          });
+        }
+      } catch (e) {}
+    };
     const toggleLocket = () => {
       const open = locket.classList.toggle("open");
+      playLocketSound(open);
       locketHint.textContent = open ? "tap to close" : "tap to open ♡";
       locket.setAttribute("aria-label", open ? "Close the locket" : "Open the locket");
     };
