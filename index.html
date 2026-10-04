@@ -105,7 +105,7 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: 30px 16px 14vh;
+      padding: 30px 16px 8vh;
     }
     .locket {
       position: relative;
@@ -208,6 +208,192 @@
       margin: 18px 0 0;
       color: #c2185b;
       font: 500 1.4rem "Caveat", cursive;
+    }
+    /* Apology card: the cover is hinged at the top and flips up to open */
+    .card-section {
+      --cw: min(560px, 92vw);
+      --ch: max(360px, calc(var(--cw) * 0.8));
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 0 16px 16vh;
+    }
+    .card {
+      position: relative;
+      width: var(--cw);
+      height: var(--ch);
+      perspective: 1800px;
+      perspective-origin: 50% 0;
+      cursor: pointer;
+      outline: none;
+      transition: margin-top 1.3s cubic-bezier(0.6, 0.05, 0.3, 1);
+    }
+    .card.open {
+      /* Room above for the flipped-up cover */
+      margin-top: var(--ch);
+      cursor: default;
+    }
+    .card-inside {
+      position: absolute;
+      inset: 0;
+      overflow: hidden;
+      border-radius: 0 0 18px 18px;
+      background: #fff5f8;
+      box-shadow: 0 14px 30px rgba(194, 24, 91, 0.2), inset 0 14px 16px -14px rgba(194, 24, 91, 0.3);
+    }
+    .card-cover {
+      position: absolute;
+      inset: 0;
+      z-index: 5;
+      transform-origin: 50% 0;
+      transform-style: preserve-3d;
+      transition: transform 1.3s cubic-bezier(0.6, 0.05, 0.3, 1);
+    }
+    .card:not(.open):hover .card-cover,
+    .card:not(.open):focus-visible .card-cover {
+      transform: rotateX(12deg);
+    }
+    .card.open .card-cover {
+      transform: rotateX(180deg);
+    }
+    .cover-face {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
+    }
+    .cover-face.front {
+      border-radius: 18px;
+      background: linear-gradient(145deg, #ffa8c6, #ff6f9f);
+      box-shadow: 0 14px 30px rgba(194, 24, 91, 0.3), inset 0 0 0 10px rgba(255, 255, 255, 0.35);
+      color: #fff;
+    }
+    .cover-face.back {
+      transform: rotateX(180deg);
+      border-radius: 18px 18px 0 0;
+      background-color: #ffe3ee;
+      background-image: radial-gradient(rgba(233, 30, 99, 0.13) 2px, transparent 2px);
+      background-size: 22px 22px;
+    }
+    .cover-title {
+      font: 400 clamp(2.8rem, 10vw, 4.4rem) "Great Vibes", cursive;
+      text-shadow: 0 3px 10px rgba(150, 20, 70, 0.35);
+    }
+    .cover-sub {
+      font: 500 1.6rem "Caveat", cursive;
+    }
+    .cover-note {
+      padding: 0 24px;
+      text-align: center;
+      font: 500 clamp(1.5rem, 5vw, 2rem) "Caveat", cursive;
+      color: #c2185b;
+    }
+    .card-hint {
+      margin: 18px 0 0;
+      color: #c2185b;
+      font: 500 1.4rem "Caveat", cursive;
+    }
+    .card-hearts {
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+      pointer-events: none;
+    }
+    .card-heart {
+      position: absolute;
+      top: 0;
+      left: 0;
+      line-height: 1;
+      will-change: transform;
+    }
+    .card-question {
+      position: absolute;
+      top: 44%;
+      left: 6%;
+      right: 6%;
+      z-index: 2;
+      margin: 0;
+      text-align: center;
+      color: #c2185b;
+      font: 400 clamp(2rem, 6.5vw, 3rem)/1.15 "Great Vibes", cursive;
+    }
+    .card-buttons {
+      position: absolute;
+      top: 66%;
+      left: 0;
+      right: 0;
+      z-index: 3;
+      display: flex;
+      justify-content: center;
+      gap: 24px;
+    }
+    .card-question,
+    .card-buttons {
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.8s ease, visibility 0.8s;
+    }
+    .card.ready .card-question,
+    .card.ready .card-buttons {
+      opacity: 1;
+      visibility: visible;
+    }
+    .card.accepted .card-buttons,
+    .card.accepted .card-btn.no {
+      opacity: 0;
+      visibility: hidden;
+    }
+    .card-btn {
+      padding: 10px 30px;
+      border-radius: 999px;
+      font: 600 1.1rem "Segoe UI", system-ui, sans-serif;
+      cursor: pointer;
+      transition: transform 0.25s ease;
+    }
+    .card-btn.yes {
+      border: none;
+      background: #e91e63;
+      color: #fff;
+      box-shadow: 0 6px 16px rgba(233, 30, 99, 0.35);
+    }
+    .card-btn.yes:hover {
+      transform: scale(1.08);
+    }
+    .card-btn.no {
+      border: 2px solid #f8bbd0;
+      background: #fff;
+      color: #c2185b;
+    }
+    .card-btn.no.runaway {
+      position: absolute;
+      z-index: 4;
+    }
+    .card-btn.no.pop {
+      animation: pop 0.35s cubic-bezier(0.3, 1.6, 0.5, 1);
+    }
+    @keyframes pop {
+      from { transform: scale(0.3); }
+      to { transform: scale(1); }
+    }
+    .card-cat {
+      position: absolute;
+      right: 3%;
+      bottom: 3%;
+      z-index: 2;
+      width: clamp(80px, 22%, 130px);
+      /* Drops the white background of the picture onto the card */
+      mix-blend-mode: multiply;
+      opacity: 0;
+      transform: scale(0.3) rotate(-25deg);
+      transition: opacity 0.5s ease 0.4s, transform 0.7s cubic-bezier(0.3, 1.6, 0.5, 1) 0.4s;
+    }
+    .card.ready .card-cat {
+      opacity: 1;
+      transform: scale(1) rotate(0deg);
     }
     .note {
       position: absolute;
@@ -436,6 +622,29 @@
     </div>
     <p class="locket-hint" id="locket-hint">tap to open ♡</p>
   </section>
+  <section class="card-section">
+    <div class="card" id="card" role="button" tabindex="0" aria-label="Open the card">
+      <div class="card-inside" id="card-inside">
+        <div class="card-hearts" id="card-hearts" aria-hidden="true"></div>
+        <p class="card-question" id="card-question">Will you accept my apology?</p>
+        <div class="card-buttons">
+          <button class="card-btn yes" id="yes-btn">Yes</button>
+          <button class="card-btn no" id="no-btn">No</button>
+        </div>
+        <img class="card-cat" id="card-cat" src="cat.jpg" alt="Sorry cat">
+      </div>
+      <div class="card-cover">
+        <div class="cover-face front">
+          <span class="cover-title">I'm sorry</span>
+          <span class="cover-sub">for Elle ♡</span>
+        </div>
+        <div class="cover-face back">
+          <span class="cover-note">From Pann, with all my heart ♡</span>
+        </div>
+      </div>
+    </div>
+    <p class="card-hint" id="card-hint">tap to open ♡</p>
+  </section>
   <audio id="song" src="Mitski%20-%20My%20Love%20Mine%20All%20Mine%20(Official%20Lyric%20Video).mp3" loop preload="auto"></audio>  <div class="rain" id="rain" aria-hidden="true"></div>
   <button class="intro" id="intro">For Elle 💖</button>
   <script>
@@ -596,6 +805,176 @@
         e.preventDefault();
         toggleLocket();
       }
+    });
+
+    // Apology card: opens, small hearts pop up one by one all over it, then
+    // fly together to spell "Pann Elle". Then the question, buttons and cat
+    // appear. "No" jumps somewhere else whenever it's pressed; only "Yes" works.
+    const card = document.getElementById("card");
+    const cardInside = document.getElementById("card-inside");
+    const cardHearts = document.getElementById("card-hearts");
+    const cardHint = document.getElementById("card-hint");
+    const question = document.getElementById("card-question");
+    const yesBtn = document.getElementById("yes-btn");
+    const noBtn = document.getElementById("no-btn");
+    const cardCat = document.getElementById("card-cat");
+    const HEART_COLORS = ["#e91e63", "#ff4f8b", "#c2185b", "#ff80ab"];
+    const heartEls = [];
+    let heartText = null;
+    let heartsFormed = false;
+
+    const withAudio = fn => {
+      try {
+        audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+        if (audioCtx.state === "suspended") audioCtx.resume();
+        const level = volume.value / 100;
+        if (level > 0) fn(level);
+      } catch (e) {}
+    };
+
+    // Sample the dots that make up the words, normalised to a 0..1 box
+    const textPoints = text => {
+      const W = 380, H = 100, step = 5;
+      const c = document.createElement("canvas");
+      c.width = W;
+      c.height = H;
+      const ctx = c.getContext("2d");
+      ctx.font = 'bold 64px "Segoe UI", Arial, sans-serif';
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText(text, W / 2, H / 2);
+      const data = ctx.getImageData(0, 0, W, H).data;
+      const pts = [];
+      for (let y = 0; y < H; y += step)
+        for (let x = 0; x < W; x += step)
+          if (data[(y * W + x) * 4 + 3] > 128) pts.push([x, y]);
+      const xs = pts.map(p => p[0]), ys = pts.map(p => p[1]);
+      const minX = Math.min(...xs), maxX = Math.max(...xs);
+      const minY = Math.min(...ys), maxY = Math.max(...ys);
+      const w = maxX - minX, h = maxY - minY;
+      return {
+        pts: pts.map(([x, y]) => [(x - minX) / w, (y - minY) / h]),
+        aspect: h / w,
+        step: step / w
+      };
+    };
+
+    const placeHeart = (el, x, y, s) => {
+      el.style.transform = `translate(${x}px, ${y}px) translate(-50%, -50%) scale(${s})`;
+    };
+    const heartTargets = () => {
+      const pw = cardInside.clientWidth, ph = cardInside.clientHeight;
+      const tw = pw * 0.84, th = tw * heartText.aspect;
+      const x0 = (pw - tw) / 2, y0 = ph * 0.1;
+      return heartText.pts.map(([nx, ny]) => [x0 + nx * tw, y0 + ny * th]);
+    };
+
+    const openCard = () => {
+      if (card.classList.contains("open")) return;
+      card.classList.add("open");
+      card.removeAttribute("role");
+      card.removeAttribute("tabindex");
+      card.removeAttribute("aria-label");
+      cardHint.hidden = true;
+      withAudio(level => [523.3, 659.3].forEach((f, i) => tone(f, i * 0.12, 0.5, 0.1 * level)));
+      setTimeout(() => cardInside.scrollIntoView({ behavior: "smooth", block: "center" }), 900);
+
+      heartText = heartText || textPoints("Pann Elle");
+      const pw = cardInside.clientWidth, ph = cardInside.clientHeight;
+      const size = heartText.step * pw * 0.84 * 1.45;
+      const n = heartText.pts.length;
+      const gap = Math.min(16, 2000 / n);
+
+      setTimeout(() => {
+        // 1. Pop up one by one at random spots
+        heartText.pts.forEach((_, i) => setTimeout(() => {
+          const h = document.createElement("span");
+          h.className = "card-heart";
+          h.textContent = "❤";
+          h.style.fontSize = `${size}px`;
+          h.style.color = HEART_COLORS[Math.floor(Math.random() * HEART_COLORS.length)];
+          const x = pw * (0.06 + Math.random() * 0.88);
+          const y = ph * (0.06 + Math.random() * 0.88);
+          placeHeart(h, x, y, 0);
+          cardHearts.appendChild(h);
+          heartEls.push(h);
+          h.getBoundingClientRect(); // commit the starting state before animating
+          h.style.transition = "transform 0.35s cubic-bezier(0.3, 1.6, 0.5, 1)";
+          placeHeart(h, x, y, 1);
+          if (i % 8 === 0) withAudio(level => tone(900 + Math.random() * 900, 0, 0.08, 0.05 * level));
+        }, i * gap));
+
+        // 2. Fly together to spell "Pann Elle"
+        setTimeout(() => {
+          const targets = heartTargets();
+          heartEls.forEach((h, i) => {
+            h.style.transition = `transform 1.3s cubic-bezier(0.6, 0, 0.3, 1) ${Math.random() * 0.35}s`;
+            placeHeart(h, targets[i][0], targets[i][1], 1);
+          });
+          heartsFormed = true;
+          // 3. Question, buttons and cat
+          setTimeout(() => card.classList.add("ready"), 1700);
+        }, n * gap + 500);
+      }, 1000);
+    };
+    card.addEventListener("click", openCard);
+    card.addEventListener("keydown", e => {
+      if (!card.classList.contains("open") && (e.key === "Enter" || e.key === " ")) {
+        e.preventDefault();
+        openCard();
+      }
+    });
+    window.addEventListener("resize", () => {
+      if (!heartsFormed) return;
+      const targets = heartTargets();
+      heartEls.forEach((h, i) => {
+        h.style.transition = "none";
+        placeHeart(h, targets[i][0], targets[i][1], 1);
+      });
+    });
+
+    // "No" runs away to a new random spot inside the card
+    const moveNo = e => {
+      e.preventDefault();
+      e.stopPropagation();
+      // Position against the whole card, not the row of buttons
+      if (noBtn.parentElement !== cardInside) cardInside.appendChild(noBtn);
+      noBtn.classList.add("runaway");
+      const box = cardInside.getBoundingClientRect();
+      const b = noBtn.getBoundingClientRect();
+      const avoid = [yesBtn, question, cardCat].map(el => {
+        const r = el.getBoundingClientRect();
+        return { l: r.left - box.left - 12, t: r.top - box.top - 12, r: r.right - box.left + 12, b: r.bottom - box.top + 12 };
+      });
+      // Keep the "Pann Elle" hearts readable too
+      const textH = box.width * 0.84 * heartText.aspect;
+      avoid.push({ l: 0, t: box.height * 0.1 - 12, r: box.width, b: box.height * 0.1 + textH + 12 });
+      const cur = { x: b.left - box.left, y: b.top - box.top };
+      let x = 8, y = 8;
+      for (let tries = 0; tries < 60; tries++) {
+        x = 8 + Math.random() * (box.width - b.width - 16);
+        y = 8 + Math.random() * (box.height - b.height - 16);
+        const hit = avoid.some(a => x < a.r && x + b.width > a.l && y < a.b && y + b.height > a.t);
+        if (!hit && Math.hypot(x - cur.x, y - cur.y) > 90) break;
+      }
+      noBtn.style.left = `${x}px`;
+      noBtn.style.top = `${y}px`;
+      noBtn.classList.remove("pop");
+      void noBtn.offsetWidth; // restart the pop animation
+      noBtn.classList.add("pop");
+      withAudio(level => tone(700, 0, 0.12, 0.08 * level, "triangle"));
+    };
+    noBtn.addEventListener("pointerdown", moveNo);
+    noBtn.addEventListener("click", moveNo);
+
+    yesBtn.addEventListener("click", () => {
+      question.textContent = "Thank you, my love ♡";
+      card.classList.add("accepted");
+      startRain();
+      withAudio(level => [1046.5, 1318.5, 1568, 2093].forEach((f, i) => {
+        tone(f, i * 0.09, 1.3, 0.16 * level);
+        tone(f * 2, i * 0.09, 0.6, 0.04 * level);
+      }));
     });
 
     // Same speed for every row regardless of its width
