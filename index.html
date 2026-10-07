@@ -535,6 +535,31 @@
       will-change: transform, opacity;
       pointer-events: none;
     }
+    .orb-stage.sphere-ready {
+      cursor: grab;
+      touch-action: pan-y;
+    }
+    .orb-stage.dragging {
+      cursor: grabbing;
+    }
+    .orb-caption {
+      position: absolute;
+      right: 2%;
+      bottom: 2%;
+      z-index: 500;
+      margin: 0;
+      color: #c2185b;
+      font: 400 clamp(1.8rem, 6vw, 2.6rem) "Great Vibes", cursive;
+      text-shadow: 0 2px 8px rgba(255, 228, 236, 0.9);
+      pointer-events: none;
+      opacity: 0;
+      transform: translateY(10px);
+      transition: opacity 1.2s ease, transform 1.2s ease;
+    }
+    .orb-stage.sphere-ready .orb-caption {
+      opacity: 1;
+      transform: translateY(0);
+    }
     .orb-hint {
       margin: 18px 0 0;
       color: #c2185b;
@@ -818,6 +843,7 @@
           <polyline pathLength="100" points="50,12 44,27 55,41 46,56 54,70 48,85 50,100"/>
         </svg>
       </div>
+      <p class="orb-caption">You are my world.</p>
     </div>
     <p class="orb-hint" id="orb-hint">tap the heart ♡</p>
   </section>
@@ -1202,6 +1228,9 @@
       const smooth = x => (x <= 0 ? 0 : x >= 1 ? 1 : x * x * (3 - 2 * x));
       const start = performance.now();
       let last = start, spin = 0, visible = true, running = false;
+      // Mouse/touch control of the sphere
+      let userYaw = 0, userPitch = 0, vYaw = 0, vPitch = 0;
+      let dragging = false, sphereShown = false;
 
       const frame = now => {
         if (!visible) { running = false; return; }
@@ -1209,7 +1238,19 @@
         const dt = Math.min(0.05, (now - last) / 1000);
         last = now;
         const k = smooth((t - 6) / 2.2); // 0 = storm, 1 = sphere
-        spin += dt * (2.8 + (0.6 - 2.8) * k);
+        if (!sphereShown && k >= 1) {
+          sphereShown = true;
+          orbStage.classList.add("sphere-ready");
+        }
+        // Auto-spin pauses while dragging; a flick keeps turning, then eases off
+        if (!dragging) {
+          spin += dt * (2.8 + (0.6 - 2.8) * k);
+          userYaw += vYaw * dt;
+          userPitch += vPitch * dt;
+          const decay = Math.pow(0.04, dt);
+          vYaw *= decay;
+          vPitch *= decay;
+        }
         const S = orbStage.clientWidth;
         const R = S * 0.33, H = S * 0.28, F = S * 2.2;
         photos.forEach((img, i) => {
@@ -1223,8 +1264,8 @@
           // Sphere: evenly spread points, slightly tilted, spinning
           const ys = 1 - 2 * (i + 0.5) / N;
           const rs = Math.sqrt(1 - ys * ys);
-          const ph = i * golden + spin;
-          const sx = rs * Math.cos(ph), sz0 = rs * Math.sin(ph), tilt = 0.35;
+          const ph = i * golden + spin + userYaw;
+          const sx = rs * Math.cos(ph), sz0 = rs * Math.sin(ph), tilt = 0.35 + userPitch;
           const sy = (ys * Math.cos(tilt) - sz0 * Math.sin(tilt)) * R;
           const sz = (ys * Math.sin(tilt) + sz0 * Math.cos(tilt)) * R;
           x += (sx * R - x) * k;
@@ -1246,6 +1287,45 @@
         last = performance.now();
         requestAnimationFrame(frame);
       };
+      // Drag to turn the sphere (on touch screens: swipe sideways,
+      // so vertical swipes still scroll the page)
+      let lastX = 0, lastY = 0, lastT = 0;
+      orbStage.addEventListener("pointerdown", e => {
+        if (!sphereShown) return;
+        e.preventDefault();
+        dragging = true;
+        vYaw = vPitch = 0;
+        lastX = e.clientX;
+        lastY = e.clientY;
+        lastT = performance.now();
+        orbStage.classList.add("dragging");
+        orbStage.setPointerCapture(e.pointerId);
+      });
+      orbStage.addEventListener("pointermove", e => {
+        if (!dragging) return;
+        const now = performance.now();
+        const sens = 3 / orbStage.clientWidth; // a full-width drag ≈ half a turn
+        const dYaw = -(e.clientX - lastX) * sens;
+        const dPitch = -(e.clientY - lastY) * sens;
+        const dts = Math.max(1, now - lastT) / 1000;
+        userYaw += dYaw;
+        userPitch += dPitch;
+        vYaw = dYaw / dts;
+        vPitch = dPitch / dts;
+        lastX = e.clientX;
+        lastY = e.clientY;
+        lastT = now;
+      });
+      const endDrag = () => {
+        if (!dragging) return;
+        dragging = false;
+        orbStage.classList.remove("dragging");
+        // Held still before letting go: no flick
+        if (performance.now() - lastT > 80) vYaw = vPitch = 0;
+      };
+      orbStage.addEventListener("pointerup", endDrag);
+      orbStage.addEventListener("pointercancel", endDrag);
+
       // Pause while scrolled out of view
       new IntersectionObserver(([entry]) => {
         visible = entry.isIntersecting;
