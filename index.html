@@ -766,7 +766,7 @@
     }
     /* Only the night sky is left once it fills the screen */
     body.night-only {
-      background: #0a0f35;
+      background: #040a22;
     }
     body.night-only > :not(.dive) {
       display: none;
@@ -780,9 +780,9 @@
       overflow: hidden;
       border-radius: 26px;
       background:
-        radial-gradient(120% 70% at 62% 100%, rgba(186, 150, 255, 0.75), transparent 62%),
-        radial-gradient(90% 80% at 50% 34%, #2b3c9a 0%, transparent 70%),
-        linear-gradient(180deg, #0a0f35 0%, #18236a 55%, #3d3f9c 100%);
+        radial-gradient(120% 70% at 62% 100%, rgba(70, 120, 220, 0.5), transparent 62%),
+        radial-gradient(90% 80% at 50% 34%, #13286b 0%, transparent 70%),
+        linear-gradient(180deg, #040a22 0%, #0a1745 55%, #142e70 100%);
       box-shadow:
         0 24px 70px rgba(10, 12, 50, 0.6),
         0 0 44px rgba(120, 130, 255, 0.35),
@@ -904,7 +904,7 @@
       animation-play-state: paused;
     }
     .letter {
-      --lw: min(320px, 82vw, calc(80vh / 1.45));
+      --lw: min(420px, 90vw, calc(86vh / 1.45));
       --lh: calc(var(--lw) * 1.45);
       --page: radial-gradient(rgba(90, 70, 200, 0.1) 1.5px, transparent 1.5px) 0 0 / 20px 20px, #f4f0ff;
       position: relative;
@@ -919,7 +919,7 @@
       cursor: default;
     }
     /* Wide screens: slide over so the open spread sits in the middle */
-    @media (min-width: 760px) {
+    @media (min-width: 900px) {
       .letter.open {
         transform: translateX(50%);
       }
@@ -1010,23 +1010,8 @@
       box-shadow: inset -12px 0 18px -14px rgba(60, 50, 140, 0.45);
     }
     .letter-moon {
-      width: 26%;
+      width: 30%;
       filter: drop-shadow(0 0 12px rgba(246, 220, 133, 0.55));
-    }
-    .letter-for {
-      margin: 6% 0 0;
-      font: 400 calc(var(--lw) * 0.17) "Great Vibes", cursive;
-      background: linear-gradient(135deg, #fbefb8, #d9a93a 40%, #f6dc85 60%, #b9851a);
-      -webkit-background-clip: text;
-      background-clip: text;
-      color: transparent;
-      filter: drop-shadow(0 0 8px rgba(246, 220, 133, 0.35));
-    }
-    .letter-hint {
-      margin: 4% 0 0;
-      color: rgba(230, 225, 255, 0.8);
-      font: 500 1.25rem "Caveat", cursive;
-      animation: letter-glow 2.4s ease-in-out infinite;
     }
     .letter-back-names {
       margin: 0;
@@ -1039,10 +1024,6 @@
     @keyframes letter-bob {
       0%, 100% { transform: translateY(0); }
       50% { transform: translateY(-8px); }
-    }
-    @keyframes letter-glow {
-      0%, 100% { opacity: 0.55; }
-      50% { opacity: 1; }
     }
     @keyframes dive-swap {
       from { opacity: 0; transform: translateY(6px); }
@@ -1166,15 +1147,15 @@
     <div class="dive-card" id="dive-card">
       <canvas class="sky" id="dive-sky" aria-hidden="true"></canvas>
       <svg class="sky-hills" viewBox="0 280 500 120" preserveAspectRatio="none" aria-hidden="true">
-        <path fill="#2a2768" opacity="0.85" d="M0 330 Q55 312 105 326 T215 306 T330 296 T425 314 T500 300 V400 H0Z"/>
-        <path fill="#151642" d="M0 346 Q60 334 112 342 T230 336 T350 344 T500 334 V400 H0Z"/>
-        <path fill="#07081f" d="M0 356 Q35 341 72 340 Q108 340 140 356 Q190 378 255 372 Q330 366 385 378 Q445 390 500 382 V400 H0Z"/>
+        <path fill="#16295e" opacity="0.85" d="M0 330 Q55 312 105 326 T215 306 T330 296 T425 314 T500 300 V400 H0Z"/>
+        <path fill="#0b1638" d="M0 346 Q60 334 112 342 T230 336 T350 344 T500 334 V400 H0Z"/>
+        <path fill="#030714" d="M0 356 Q35 341 72 340 Q108 340 140 356 Q190 378 255 372 Q330 366 385 378 Q445 390 500 382 V400 H0Z"/>
       </svg>
       <svg class="sky-person" viewBox="64 310 20 32" aria-hidden="true">
-        <g fill="#07081f">
+        <g fill="#030714">
           <circle cx="72" cy="318.5" r="3.4"/>
           <path d="M68.6 323.5 Q72 321.5 75.4 323.5 L76.4 333 L74.6 333.4 L74.2 341 L72.7 341 L72 334 L71.3 341 L69.8 341 L69.4 333.4 L67.6 333 Z"/>
-          <path d="M75 324.5 L80.5 313" stroke="#07081f" stroke-width="1.8" stroke-linecap="round"/>
+          <path d="M75 324.5 L80.5 313" stroke="#030714" stroke-width="1.8" stroke-linecap="round"/>
         </g>
       </svg>
       <div class="dive-content" id="dive-content">
@@ -1208,8 +1189,6 @@
                   </defs>
                   <path fill="url(#moon-gold)" d="M25 3a17 17 0 1 0 12 29A15 15 0 0 1 25 3z"/>
                 </svg>
-                <p class="letter-for">For Elle ♡</p>
-                <p class="letter-hint">tap to open</p>
               </div>
               <div class="letter-face back">
                 <p class="letter-back-names">Pann ♡ Elle</p>
