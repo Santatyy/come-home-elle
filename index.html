@@ -930,7 +930,7 @@
       transform-style: preserve-3d;
     }
     .letter-cover {
-      z-index: 2;
+      z-index: 3;
       transition: transform 1.3s cubic-bezier(0.6, 0.05, 0.3, 1);
     }
     .letter:not(.open):hover .letter-cover,
@@ -940,13 +940,25 @@
     .letter.open .letter-cover {
       transform: rotateY(-180deg);
     }
-    /* The turning page drops back under the cover only after it lands */
+    /* Turned pages stack up on the left, each newer one on top; a page
+       turned back only drops under the others once it has landed */
     .letter-leaf {
-      z-index: 1;
       transition: transform var(--turn), z-index 0s linear 1.2s;
     }
-    .letter.page2 .letter-leaf {
-      z-index: 3;
+    .leaf1 {
+      z-index: 2;
+    }
+    .leaf2 {
+      z-index: 1;
+    }
+    .letter[data-page="2"] .leaf1,
+    .letter[data-page="3"] .leaf1 {
+      z-index: 4;
+      transform: rotateY(-180deg);
+      transition: transform var(--turn), z-index 0s;
+    }
+    .letter[data-page="3"] .leaf2 {
+      z-index: 5;
       transform: rotateY(-180deg);
       transition: transform var(--turn), z-index 0s;
     }
@@ -1147,12 +1159,28 @@
     .letter.open .letter-msg p:nth-child(2) {
       transition-delay: 1.8s;
     }
-    .letter.page2 .letter-msg.later p {
-      transition-delay: 1.1s;
-    }
-    .letter:not(.page2) .letter-msg.later p {
+    /* Later pages' words only come up once their page is turned to */
+    .letter .letter-msg.later p {
       opacity: 0;
+      transform: translateY(10px);
       transition-delay: 0s;
+    }
+    .letter[data-page="2"] .on2 p,
+    .letter[data-page="3"] .on2 p,
+    .letter[data-page="3"] .on3 p {
+      opacity: 1;
+      transform: none;
+    }
+    .letter[data-page="2"] .on2 p:nth-child(1),
+    .letter[data-page="3"] .on3 p:nth-child(1) {
+      transition-delay: 1s;
+    }
+    .letter[data-page="2"] .on2 p:nth-child(2),
+    .letter[data-page="3"] .on3 p:nth-child(2) {
+      transition-delay: 1.8s;
+    }
+    .letter[data-page="2"] .on2 p:nth-child(3) {
+      transition-delay: 2.4s;
     }
     .letter-thanks {
       color: #f1e4c0;
@@ -1169,6 +1197,46 @@
       color: #f1e4c0;
       font: 400 calc(var(--lw) * 0.12)/1.2 "Great Vibes", cursive;
       text-shadow: 0 0 14px rgba(240, 220, 170, 0.35);
+    }
+    .letter-slow {
+      color: #f1e4c0;
+      font: 400 calc(var(--lw) * 0.092)/1.25 "Great Vibes", cursive;
+      text-shadow: 0 0 14px rgba(240, 220, 170, 0.35);
+    }
+    .letter-msg .letter-soft {
+      margin-top: 6%;
+      color: #dde4f7;
+      font: 400 calc(var(--lw) * 0.085)/1.25 "Great Vibes", cursive;
+      text-shadow: 0 0 12px rgba(170, 190, 240, 0.5);
+    }
+    /* Left page of the third spread: two stars slowly circling each other */
+    .twin-stars {
+      position: absolute;
+      top: 40%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      animation: twin-orbit 40s linear infinite;
+    }
+    .twin-stars span {
+      position: absolute;
+      width: 6px;
+      height: 6px;
+      margin: -3px 0 0 -3px;
+      border-radius: 50%;
+      background: #fffaf0;
+      box-shadow: 0 0 10px 3px rgba(255, 246, 220, 0.7), 0 0 34px 10px rgba(190, 205, 255, 0.2);
+      animation: twinkle 4.4s ease-in-out infinite;
+    }
+    .twin-stars span:first-child {
+      left: -16px;
+    }
+    .twin-stars span:last-child {
+      left: 16px;
+      width: 4px;
+      height: 4px;
+      margin: -2px 0 0 -2px;
+      animation-delay: -2.2s;
     }
     .letter-msg .letter-mark {
       margin-top: 6%;
@@ -1211,9 +1279,14 @@
     .letter.open .letter-turn.next {
       transition-delay: 0s, 2.6s;
     }
-    .letter.page2 .letter-turn.next,
-    .letter:not(.page2) .letter-turn.prev {
+    /* Only the buttons on the pages in view can be pressed */
+    .letter .letter-turn {
       pointer-events: none;
+    }
+    .letter[data-page="1"] .letter-turn[data-from="1"],
+    .letter[data-page="2"] .letter-turn[data-from="2"],
+    .letter[data-page="3"] .letter-turn[data-from="3"] {
+      pointer-events: auto;
     }
     /* Portrait phones: too narrow for two pages side by side, so the card
        opens upwards like a notepad and the pages turn over the top edge */
@@ -1230,7 +1303,9 @@
         transform: rotateX(14deg);
       }
       .letter.open .letter-cover,
-      .letter.page2 .letter-leaf {
+      .letter[data-page="2"] .leaf1,
+      .letter[data-page="3"] .leaf1,
+      .letter[data-page="3"] .leaf2 {
         transform: rotateX(180deg);
       }
       .letter-face.flip {
@@ -1267,6 +1342,9 @@
       1.5% { opacity: 1; }
       7% { opacity: 0; transform: rotate(-28deg) translateX(-150px); }
       100% { opacity: 0; transform: rotate(-28deg) translateX(-150px); }
+    }
+    @keyframes twin-orbit {
+      to { transform: rotate(360deg); }
     }
     @keyframes cloud-drift {
       from { transform: translateX(-8%); }
@@ -1421,16 +1499,33 @@
       </div>
       <div class="letter-stage" id="letter-stage" hidden>
         <div class="letter-float" id="letter-float">
-          <div class="letter" id="letter" role="button" tabindex="0" aria-label="Open the card">
-            <!-- Second spread, right page: lies under the page that turns -->
+          <div class="letter" id="letter" data-page="1" role="button" tabindex="0" aria-label="Open the card">
+            <!-- Third spread, right page: lies under the pages that turn -->
             <div class="letter-face right night-page">
-              <div class="letter-msg later">
+              <div class="letter-msg later on3">
                 <p class="letter-quiet">You are my world.</p>
                 <p class="letter-mark">♡</p>
               </div>
             </div>
-            <!-- The message page; "next page" turns it over to the left -->
-            <div class="letter-leaf">
+            <!-- Second message page; "next page" turns it over to the third spread -->
+            <div class="letter-leaf leaf2">
+              <div class="letter-face right night-page">
+                <span class="letter-spark" style="top: 10%; right: 15%; font-size: 11px; animation-delay: -0.8s" aria-hidden="true">✦</span>
+                <span class="letter-spark" style="bottom: 14%; left: 12%; font-size: 12px; animation-delay: -2s" aria-hidden="true">✦</span>
+                <div class="letter-msg later on2">
+                  <p class="letter-slow">Take your time to consider when I am ready, darling.</p>
+                  <p class="letter-soft">Don't rush.</p>
+                  <p class="letter-soft">I'll always chase you and be close to you.</p>
+                </div>
+                <button class="letter-turn next" type="button" data-from="2" data-go="3">next page ›</button>
+              </div>
+              <div class="letter-face left flip night-page">
+                <span class="twin-stars" aria-hidden="true"><span></span><span></span></span>
+                <button class="letter-turn prev" type="button" data-from="3" data-go="2">‹ previous page</button>
+              </div>
+            </div>
+            <!-- First message page; "next page" turns it over to the left -->
+            <div class="letter-leaf leaf1">
               <div class="letter-face right night-page">
                 <span class="letter-spark" style="top: 9%; left: 14%; font-size: 12px" aria-hidden="true">✦</span>
                 <span class="letter-spark" style="bottom: 15%; left: 10%; font-size: 10px; animation-delay: -1.6s" aria-hidden="true">✦</span>
@@ -1453,11 +1548,11 @@
                   <p class="letter-thanks">Thanks for being my girlfriend.</p>
                   <p class="letter-lucky">You don't know how lucky I am to have you.</p>
                 </div>
-                <button class="letter-turn next" id="letter-next" type="button">next page ›</button>
+                <button class="letter-turn next" type="button" data-from="1" data-go="2">next page ›</button>
               </div>
               <div class="letter-face left flip night-page trails-page">
                 <span class="lone-star" aria-hidden="true"></span>
-                <button class="letter-turn prev" id="letter-prev" type="button">‹ previous page</button>
+                <button class="letter-turn prev" type="button" data-from="2" data-go="1">‹ previous page</button>
               </div>
             </div>
             <div class="letter-cover">
@@ -2225,16 +2320,17 @@
         openLetter();
       }
     });
-    const turnPage = toNext => e => {
+    const turnPage = e => {
       e.stopPropagation();
-      letter.classList.toggle("page2", toNext);
+      const to = e.currentTarget.dataset.go;
+      const forward = to > letter.dataset.page;
+      letter.dataset.page = to;
       withAudio(level => {
-        tone(toNext ? 659.25 : 587.33, 0, 0.9, 0.05 * level);
-        tone(toNext ? 880 : 783.99, 0.1, 1.1, 0.04 * level);
+        tone(forward ? 659.25 : 587.33, 0, 0.9, 0.05 * level);
+        tone(forward ? 880 : 783.99, 0.1, 1.1, 0.04 * level);
       });
     };
-    document.getElementById("letter-next").addEventListener("click", turnPage(true));
-    document.getElementById("letter-prev").addEventListener("click", turnPage(false));
+    letter.querySelectorAll(".letter-turn").forEach(b => b.addEventListener("click", turnPage));
 
     // Same speed for every row regardless of its width
     window.addEventListener("load", () => {
