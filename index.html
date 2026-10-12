@@ -1558,7 +1558,8 @@
     </div>
     <p class="orb-hint" id="orb-hint">tap the heart ♡</p>
   </section>
-  <audio id="song" src="Mitski%20-%20My%20Love%20Mine%20All%20Mine%20(Official%20Lyric%20Video).mp3" loop preload="auto"></audio>  <div class="rain" id="rain" aria-hidden="true"></div>
+  <audio id="song" src="Mitski%20-%20My%20Love%20Mine%20All%20Mine%20(Official%20Lyric%20Video).mp3" loop preload="auto"></audio>
+  <audio id="night-song" src="Ruth%20B.%20-%20Dandelions%20(Lyrics)%20%5B4k%5D.mp3" loop preload="none"></audio>  <div class="rain" id="rain" aria-hidden="true"></div>
   <button class="intro" id="intro">For Elle 💖</button>
   <div class="dive" id="dive" role="dialog" aria-modal="true" aria-labelledby="dive-title" hidden>
     <div class="dive-card" id="dive-card">
@@ -2372,6 +2373,51 @@
         setTimeout(() => { diveNo.hidden = true; }, 350);
       }
     });
+    // Music for the night: "Yes" fades out "My Love Mine All Mine", and
+    // Dandelions fades in once the night fills the screen. Dandelions is
+    // started (muted) on the "Yes" tap itself, as phones only let sound start
+    // from a tap. If it can't play, the first song fades back in.
+    const nightSong = document.getElementById("night-song");
+    const NIGHT_SONG_START = 0.45; // skip the short silence at the start
+    // iPhones ignore volume changes, so there the songs switch without fading
+    const canFade = (() => {
+      const probe = new Audio();
+      probe.volume = 0.5;
+      return probe.volume === 0.5;
+    })();
+    let songFade = 0;
+    const fadeVolume = (audio, to, ms, done) => {
+      const from = audio.volume, t0 = performance.now();
+      const timer = setInterval(() => {
+        const k = Math.min((performance.now() - t0) / ms, 1);
+        audio.volume = from + (to - from) * k;
+        if (k < 1) return;
+        clearInterval(timer);
+        if (done) done();
+      }, 50);
+      return timer;
+    };
+    const fadeOutFirstSong = () => {
+      stopRetry(); // it must not restart on a later tap
+      if (canFade) songFade = fadeVolume(song, 0, 1500, () => song.pause());
+      else song.pause();
+    };
+    const bringBackFirstSong = () => {
+      clearInterval(songFade);
+      song.play().catch(() => {});
+      if (canFade) songFade = fadeVolume(song, volume.value / 100, 1500);
+    };
+    let nightSongReady = false, nightHasCome = false, nightSongOn = false;
+    const startNightSong = () => {
+      if (!nightSongReady || !nightHasCome || nightSongOn) return;
+      nightSongOn = true;
+      nightSong.currentTime = NIGHT_SONG_START;
+      nightSong.muted = false;
+      if (!canFade) return;
+      nightSong.volume = 0;
+      fadeVolume(nightSong, volume.value / 100, 3000);
+    };
+
     let dived = false;
     diveYes.addEventListener("click", () => {
       if (dived) return;
@@ -2384,6 +2430,12 @@
       void diveCard.offsetWidth;
       Object.assign(diveCard.style, { left: "0px", top: "0px", width: "100%", height: "100%", borderRadius: "0px", boxShadow: "none" });
       dive.classList.add("expanding");
+      fadeOutFirstSong();
+      nightSong.muted = true;
+      nightSong.play().then(() => {
+        nightSongReady = true;
+        startNightSong();
+      }).catch(bringBackFirstSong);
       withAudio(level => [523.25, 659.25, 783.99, 1046.5, 1318.5, 1568, 2093].forEach((f, i) => {
         tone(f, i * 0.07, 1.2, 0.12 * level);
         tone(f * 2, i * 0.07, 0.5, 0.03 * level);
@@ -2392,6 +2444,8 @@
       setTimeout(() => {
         document.body.classList.add("night-only");
         diveContent.hidden = true;
+        nightHasCome = true;
+        startNightSong();
       }, 1050);
       setTimeout(() => {
         letterStage.hidden = false;
