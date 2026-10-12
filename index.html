@@ -734,6 +734,130 @@
       opacity: 0;
       visibility: hidden;
     }
+    /* "Let's dive in." popup, styled after spiralstar.jpg: a night sky with
+       circling star trails over dark hills and a small stargazer */
+    .dive {
+      position: fixed;
+      inset: 0;
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(12, 14, 46, 0.55);
+      -webkit-backdrop-filter: blur(4px);
+      backdrop-filter: blur(4px);
+      opacity: 0;
+      transition: opacity 0.6s ease;
+    }
+    .dive[hidden] {
+      display: none;
+    }
+    .dive.show {
+      opacity: 1;
+    }
+    .dive.diving {
+      opacity: 0;
+      transition: opacity 0.7s ease 0.6s;
+    }
+    .dive-card {
+      position: relative;
+      width: min(440px, calc(100vw - 32px), calc((100vh - 32px) * 1.25));
+      aspect-ratio: 5 / 4;
+      border-radius: 26px;
+      overflow: hidden;
+      background:
+        radial-gradient(120% 70% at 62% 100%, rgba(186, 150, 255, 0.75), transparent 62%),
+        radial-gradient(90% 80% at 50% 34%, #2b3c9a 0%, transparent 70%),
+        linear-gradient(180deg, #0a0f35 0%, #18236a 55%, #3d3f9c 100%);
+      box-shadow:
+        0 24px 70px rgba(10, 12, 50, 0.6),
+        0 0 44px rgba(120, 130, 255, 0.35),
+        inset 0 0 0 1px rgba(255, 255, 255, 0.14);
+      transform: translateY(24px) scale(0.9);
+      transition: transform 0.7s cubic-bezier(0.2, 0.9, 0.3, 1.2);
+    }
+    .dive.show .dive-card {
+      transform: none;
+    }
+    .dive.diving .dive-card {
+      transform: scale(1.7);
+      opacity: 0;
+      transition: transform 1.2s cubic-bezier(0.6, 0, 0.8, 0.4), opacity 0.8s ease 0.45s;
+    }
+    .dive-sky,
+    .dive-hills {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+    }
+    .dive-content {
+      position: absolute;
+      top: 20%;
+      left: 0;
+      right: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 0 16px;
+      text-align: center;
+    }
+    .dive-title {
+      margin: 0;
+      color: #fff;
+      font: 400 clamp(2.4rem, 10vw, 3.4rem) "Great Vibes", cursive;
+      line-height: 1.25;
+      text-shadow: 0 0 10px rgba(190, 200, 255, 0.9), 0 0 28px rgba(140, 120, 255, 0.7);
+    }
+    .dive-title.swap {
+      animation: dive-swap 0.45s ease;
+    }
+    .dive-buttons {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      margin-top: 12px;
+    }
+    .dive-btn {
+      padding: 0.15em 1.3em;
+      border-radius: 999px;
+      color: #fff;
+      font: 500 calc(1.45rem * var(--s, 1)) "Caveat", cursive;
+      cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.2s ease, font-size 0.35s ease, opacity 0.35s ease;
+    }
+    .dive-btn[hidden] {
+      display: none;
+    }
+    .dive-btn:hover {
+      transform: translateY(-2px);
+    }
+    .dive-btn:focus-visible {
+      outline: 2px solid #fff;
+      outline-offset: 3px;
+    }
+    .dive-btn.yes {
+      --s: var(--yes, 1);
+      border: none;
+      background: linear-gradient(135deg, #8fa2ff, #8a6cf0 55%, #d58cff);
+      box-shadow: 0 0 18px rgba(150, 140, 255, 0.7);
+    }
+    .dive-btn.yes:hover {
+      box-shadow: 0 0 28px rgba(175, 165, 255, 0.95);
+    }
+    .dive-btn.no {
+      --s: var(--no, 1);
+      border: 1.5px solid rgba(255, 255, 255, 0.6);
+      background: rgba(255, 255, 255, 0.08);
+    }
+    .dive-btn.gone {
+      opacity: 0;
+      pointer-events: none;
+    }
+    @keyframes dive-swap {
+      from { opacity: 0; transform: translateY(6px); }
+    }
     @keyframes fall {
       to { transform: translateY(110vh) rotate(var(--spin)); opacity: 0.2; }
     }
@@ -849,6 +973,28 @@
   </section>
   <audio id="song" src="Mitski%20-%20My%20Love%20Mine%20All%20Mine%20(Official%20Lyric%20Video).mp3" loop preload="auto"></audio>  <div class="rain" id="rain" aria-hidden="true"></div>
   <button class="intro" id="intro">For Elle 💖</button>
+  <div class="dive" id="dive" role="dialog" aria-modal="true" aria-labelledby="dive-title" hidden>
+    <div class="dive-card">
+      <canvas class="dive-sky" id="dive-sky" aria-hidden="true"></canvas>
+      <svg class="dive-hills" viewBox="0 0 500 400" preserveAspectRatio="none" aria-hidden="true">
+        <path fill="#2a2768" opacity="0.85" d="M0 330 Q55 312 105 326 T215 306 T330 296 T425 314 T500 300 V400 H0Z"/>
+        <path fill="#151642" d="M0 346 Q60 334 112 342 T230 336 T350 344 T500 334 V400 H0Z"/>
+        <path fill="#07081f" d="M0 356 Q35 341 72 340 Q108 340 140 356 Q190 378 255 372 Q330 366 385 378 Q445 390 500 382 V400 H0Z"/>
+        <g fill="#07081f">
+          <circle cx="72" cy="318.5" r="3.4"/>
+          <path d="M68.6 323.5 Q72 321.5 75.4 323.5 L76.4 333 L74.6 333.4 L74.2 341 L72.7 341 L72 334 L71.3 341 L69.8 341 L69.4 333.4 L67.6 333 Z"/>
+          <path d="M75 324.5 L80.5 313" stroke="#07081f" stroke-width="1.8" stroke-linecap="round"/>
+        </g>
+      </svg>
+      <div class="dive-content">
+        <h2 class="dive-title" id="dive-title">Let's dive in.</h2>
+        <div class="dive-buttons">
+          <button class="dive-btn yes" id="dive-yes">Yes</button>
+          <button class="dive-btn no" id="dive-no">No</button>
+        </div>
+      </div>
+    </div>
+  </div>
   <script>
     // Discourage casual source viewing: block right-click and the
     // dev-tools / view-source shortcuts. This only deters; it can't
@@ -920,9 +1066,11 @@
     const intro = document.getElementById("intro");
 
     let opened = false;
+    let openedAt = 0;
     const open = () => {
       if (opened) return;
       opened = true;
+      openedAt = performance.now();
       intro.classList.add("hidden");
       startRain();
     };
@@ -1386,6 +1534,124 @@
         e.preventDefault();
         tapShell();
       }
+    });
+
+    // After 30 seconds on the page (only counting while the tab is in view)
+    // a starry "Let's dive in." popup appears. Each "No" makes "Yes" bigger
+    // and "No" smaller until "No" fades away; "Yes" dives into the stars.
+    const dive = document.getElementById("dive");
+    const diveSky = document.getElementById("dive-sky");
+    const diveTitle = document.getElementById("dive-title");
+    const diveYes = document.getElementById("dive-yes");
+    const diveNo = document.getElementById("dive-no");
+    const skyCtx = diveSky.getContext("2d");
+    const TRAIL_COLORS = ["255,255,255", "255,255,255", "200,214,255", "255,214,240"];
+    const trails = Array.from({ length: 170 }, () => ({
+      r: 0.02 + Math.random() * 0.98, // share of the largest radius
+      a: Math.random() * Math.PI * 2,
+      len: 0.25 + Math.random() * 1.1, // arc length in radians
+      w: 0.5 + Math.random() * 1.1,
+      alpha: 0.25 + Math.random() * 0.65,
+      color: TRAIL_COLORS[Math.floor(Math.random() * TRAIL_COLORS.length)]
+    }));
+    let skyRaf = 0, skyLast = 0, skyCenterY = 0.36, warp = 0, warpStart = 0;
+    const sizeSky = () => {
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      diveSky.width = diveSky.clientWidth * dpr;
+      diveSky.height = diveSky.clientHeight * dpr;
+      // The trails circle around the title, like the pole star in the photo
+      const c = diveSky.getBoundingClientRect();
+      const t = diveTitle.getBoundingClientRect();
+      skyCenterY = (t.top + t.height / 2 - c.top) / c.height;
+    };
+    const drawSky = now => {
+      const dt = Math.min((now - (skyLast || now)) / 1000, 0.05);
+      skyLast = now;
+      if (warpStart) warp = Math.min((now - warpStart) / 1100, 1);
+      const W = diveSky.width, H = diveSky.height;
+      const dpr = W / diveSky.clientWidth;
+      const cx = W / 2, cy = H * skyCenterY;
+      const maxR = Math.hypot(cx, Math.max(cy, H - cy));
+      const spin = 0.06 + warp * warp * 3;
+      const stretch = 1 + warp * 1.8;
+      const PARTS = 4;
+      skyCtx.clearRect(0, 0, W, H);
+      skyCtx.lineCap = "round";
+      for (const s of trails) {
+        s.a -= spin * dt; // counter-clockwise
+        const r = s.r * maxR;
+        const len = Math.min(s.len * stretch, 5.5);
+        const glow = s.alpha * (0.85 + 0.15 * Math.sin(now / 600 + s.r * 40));
+        skyCtx.lineWidth = s.w * dpr;
+        // The head is brightest; the tail fades out behind it
+        for (let p = 0; p < PARTS; p++) {
+          skyCtx.beginPath();
+          skyCtx.arc(cx, cy, r, s.a + len * p / PARTS, s.a + len * (p + 1) / PARTS);
+          skyCtx.strokeStyle = `rgba(${s.color},${glow * (1 - p / PARTS)})`;
+          skyCtx.stroke();
+        }
+      }
+      skyRaf = requestAnimationFrame(drawSky);
+    };
+    const showDive = () => {
+      dive.hidden = false;
+      void dive.offsetWidth; // let the fade-in transition run
+      dive.classList.add("show");
+      sizeSky();
+      skyLast = 0;
+      skyRaf = requestAnimationFrame(drawSky);
+      diveYes.focus({ preventScroll: true });
+      withAudio(level => [784, 1046.5, 1318.5].forEach((f, i) => tone(f, i * 0.12, 1.4, 0.07 * level)));
+    };
+    let seenMs = 0, seenLast = performance.now();
+    const diveTimer = setInterval(() => {
+      const now = performance.now();
+      if (!document.hidden) seenMs += Math.min(now - seenLast, 1000);
+      seenLast = now;
+      // Wait for the opening screen to be gone before showing it
+      if (seenMs >= 30000 && opened && now - openedAt > 1200) {
+        clearInterval(diveTimer);
+        showDive();
+      }
+    }, 250);
+    window.addEventListener("resize", () => {
+      if (!dive.hidden) sizeSky();
+    });
+    // The page behind stays put while the popup is up
+    ["wheel", "touchmove"].forEach(type =>
+      dive.addEventListener(type, e => e.preventDefault(), { passive: false }));
+
+    const NO_LINES = ["Are you sure? ♡", "Please, my love? ♡", "Pretty please… ♡"];
+    let noCount = 0;
+    diveNo.addEventListener("click", () => {
+      noCount++;
+      diveTitle.textContent = NO_LINES[noCount - 1];
+      diveTitle.classList.remove("swap");
+      void diveTitle.offsetWidth; // restart the swap animation
+      diveTitle.classList.add("swap");
+      dive.style.setProperty("--yes", 1 + noCount * 0.22);
+      dive.style.setProperty("--no", 1 - noCount * 0.22);
+      withAudio(level => tone(330, 0, 0.18, 0.08 * level, "triangle"));
+      if (noCount >= NO_LINES.length) {
+        diveNo.classList.add("gone");
+        diveYes.focus({ preventScroll: true });
+        setTimeout(() => { diveNo.hidden = true; }, 350);
+      }
+    });
+    let dived = false;
+    diveYes.addEventListener("click", () => {
+      if (dived) return;
+      dived = true;
+      warpStart = performance.now();
+      dive.classList.add("diving");
+      withAudio(level => [523.25, 659.25, 783.99, 1046.5, 1318.5, 1568, 2093].forEach((f, i) => {
+        tone(f, i * 0.07, 1.2, 0.12 * level);
+        tone(f * 2, i * 0.07, 0.5, 0.03 * level);
+      }));
+      setTimeout(() => {
+        cancelAnimationFrame(skyRaf);
+        dive.hidden = true;
+      }, 1400);
     });
 
     // Same speed for every row regardless of its width
