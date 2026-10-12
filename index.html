@@ -891,6 +891,18 @@
     /* Tall card under the stars that opens like a small book: the cover's
        inside is the left page, the message is on the right, and "next page"
        turns the message page over to the next spread. Quiet moonlight tones. */
+    @font-face {
+      font-family: "Glacial Indifference";
+      src: url("fonts/GlacialIndifference-Regular.woff") format("woff");
+      font-weight: 400;
+      font-display: swap;
+    }
+    @font-face {
+      font-family: "Glacial Indifference";
+      src: url("fonts/GlacialIndifference-Bold.woff") format("woff");
+      font-weight: 700;
+      font-display: swap;
+    }
     .letter-stage {
       position: absolute;
       inset: 0;
@@ -915,6 +927,7 @@
       perspective: 1800px;
       cursor: pointer;
       outline: none;
+      font-family: "Glacial Indifference", "Segoe UI", sans-serif;
       transition: transform var(--turn);
     }
     /* Open: slide over so the spread is centred, shrinking it on narrow screens */
@@ -930,7 +943,7 @@
       transform-style: preserve-3d;
     }
     .letter-cover {
-      z-index: 3;
+      z-index: 4;
       transition: transform 1.3s cubic-bezier(0.6, 0.05, 0.3, 1);
     }
     .letter:not(.open):hover .letter-cover,
@@ -946,21 +959,28 @@
       transition: transform var(--turn), z-index 0s linear 1.2s;
     }
     .leaf1 {
-      z-index: 2;
+      z-index: 3;
     }
     .leaf2 {
+      z-index: 2;
+    }
+    .leaf3 {
       z-index: 1;
     }
-    .letter[data-page="2"] .leaf1,
-    .letter[data-page="3"] .leaf1 {
-      z-index: 4;
+    .letter:is([data-page="2"], [data-page="3"], [data-page="4"]) .leaf1,
+    .letter:is([data-page="3"], [data-page="4"]) .leaf2,
+    .letter[data-page="4"] .leaf3 {
       transform: rotateY(-180deg);
       transition: transform var(--turn), z-index 0s;
     }
-    .letter[data-page="3"] .leaf2 {
+    .letter:is([data-page="2"], [data-page="3"], [data-page="4"]) .leaf1 {
       z-index: 5;
-      transform: rotateY(-180deg);
-      transition: transform var(--turn), z-index 0s;
+    }
+    .letter:is([data-page="3"], [data-page="4"]) .leaf2 {
+      z-index: 6;
+    }
+    .letter[data-page="4"] .leaf3 {
+      z-index: 7;
     }
     .letter-face {
       position: absolute;
@@ -1165,18 +1185,20 @@
       transform: translateY(10px);
       transition-delay: 0s;
     }
-    .letter[data-page="2"] .on2 p,
-    .letter[data-page="3"] .on2 p,
-    .letter[data-page="3"] .on3 p {
+    .letter:is([data-page="2"], [data-page="3"], [data-page="4"]) .on2 p,
+    .letter:is([data-page="3"], [data-page="4"]) .on3 p,
+    .letter[data-page="4"] .on4 p {
       opacity: 1;
       transform: none;
     }
     .letter[data-page="2"] .on2 p:nth-child(1),
-    .letter[data-page="3"] .on3 p:nth-child(1) {
+    .letter[data-page="3"] .on3 p:nth-child(1),
+    .letter[data-page="4"] .on4 p:nth-child(1) {
       transition-delay: 1s;
     }
     .letter[data-page="2"] .on2 p:nth-child(2),
-    .letter[data-page="3"] .on3 p:nth-child(2) {
+    .letter[data-page="3"] .on3 p:nth-child(2),
+    .letter[data-page="4"] .on4 p:nth-child(2) {
       transition-delay: 1.8s;
     }
     .letter[data-page="2"] .on2 p:nth-child(3) {
@@ -1184,29 +1206,34 @@
     }
     .letter-thanks {
       color: #f1e4c0;
-      font: 400 calc(var(--lw) * 0.112)/1.15 "Great Vibes", cursive;
+      font: 400 calc(var(--lw) * 0.072)/1.35 "Glacial Indifference", "Segoe UI", sans-serif;
+      letter-spacing: 0.04em;
       text-shadow: 0 0 14px rgba(240, 220, 170, 0.35);
     }
     .letter-msg .letter-lucky {
       margin-top: 7%;
       color: #dde4f7;
-      font: 400 calc(var(--lw) * 0.088)/1.25 "Great Vibes", cursive;
+      font: 400 calc(var(--lw) * 0.056)/1.5 "Glacial Indifference", "Segoe UI", sans-serif;
+      letter-spacing: 0.03em;
       text-shadow: 0 0 12px rgba(170, 190, 240, 0.5);
     }
     .letter-quiet {
       color: #f1e4c0;
-      font: 400 calc(var(--lw) * 0.12)/1.2 "Great Vibes", cursive;
+      font: 400 calc(var(--lw) * 0.075)/1.4 "Glacial Indifference", "Segoe UI", sans-serif;
+      letter-spacing: 0.04em;
       text-shadow: 0 0 14px rgba(240, 220, 170, 0.35);
     }
     .letter-slow {
       color: #f1e4c0;
-      font: 400 calc(var(--lw) * 0.092)/1.25 "Great Vibes", cursive;
+      font: 400 calc(var(--lw) * 0.062)/1.45 "Glacial Indifference", "Segoe UI", sans-serif;
+      letter-spacing: 0.03em;
       text-shadow: 0 0 14px rgba(240, 220, 170, 0.35);
     }
     .letter-msg .letter-soft {
       margin-top: 6%;
       color: #dde4f7;
-      font: 400 calc(var(--lw) * 0.085)/1.25 "Great Vibes", cursive;
+      font: 400 calc(var(--lw) * 0.056)/1.5 "Glacial Indifference", "Segoe UI", sans-serif;
+      letter-spacing: 0.03em;
       text-shadow: 0 0 12px rgba(170, 190, 240, 0.5);
     }
     /* Left page of the third spread: two stars slowly circling each other */
@@ -1238,6 +1265,29 @@
       margin: -2px 0 0 -2px;
       animation-delay: -2.2s;
     }
+    .letter-love {
+      color: #f6ead0;
+      font: 700 calc(var(--lw) * 0.1)/1.2 "Glacial Indifference", "Segoe UI", sans-serif;
+      letter-spacing: 0.08em;
+      text-shadow: 0 0 18px rgba(240, 220, 170, 0.45);
+    }
+    /* Left page of the last spread: a full moon with a slowly breathing halo */
+    .full-moon {
+      position: absolute;
+      top: 24%;
+      left: 50%;
+      width: 34%;
+      aspect-ratio: 1;
+      border-radius: 50%;
+      transform: translateX(-50%);
+      background:
+        radial-gradient(42% 30% at 36% 60%, rgba(140, 142, 165, 0.16), transparent 75%),
+        radial-gradient(26% 20% at 66% 70%, rgba(140, 142, 165, 0.1), transparent 75%),
+        radial-gradient(20% 26% at 70% 36%, rgba(140, 142, 165, 0.07), transparent 75%),
+        radial-gradient(circle at 40% 38%, #fffdf4, #ece7d6 55%, #c8cddf 100%);
+      box-shadow: 0 0 30px 6px rgba(235, 235, 255, 0.25), 0 0 110px 34px rgba(170, 190, 255, 0.12);
+      animation: moon-breathe 6s ease-in-out infinite;
+    }
     .letter-msg .letter-mark {
       margin-top: 6%;
       color: rgba(221, 228, 247, 0.7);
@@ -1258,7 +1308,8 @@
       border: none;
       background: none;
       color: rgba(221, 228, 247, 0.7);
-      font: 500 calc(var(--lw) * 0.05) "Caveat", cursive;
+      font: 400 calc(var(--lw) * 0.04) "Glacial Indifference", "Segoe UI", sans-serif;
+      letter-spacing: 0.08em;
       cursor: pointer;
       transition: color 0.3s ease, opacity 0.8s ease;
     }
@@ -1267,7 +1318,8 @@
       color: #fff;
       outline: none;
     }
-    .letter-turn.next {
+    .letter-turn.next,
+    .letter-turn.close {
       right: 7%;
     }
     .letter-turn.prev {
@@ -1285,8 +1337,27 @@
     }
     .letter[data-page="1"] .letter-turn[data-from="1"],
     .letter[data-page="2"] .letter-turn[data-from="2"],
-    .letter[data-page="3"] .letter-turn[data-from="3"] {
+    .letter[data-page="3"] .letter-turn[data-from="3"],
+    .letter[data-page="4"] .letter-turn[data-from="4"] {
       pointer-events: auto;
+    }
+    /* "close" sends the card off, and the night series photos come out */
+    .letter-stage.leaving .letter-float {
+      animation: letter-out 1.1s cubic-bezier(0.5, 0, 0.75, 0) forwards;
+    }
+    .night-orb {
+      --s: min(560px, 92vw, 78vh);
+      position: absolute;
+      top: calc(50% - var(--hills) * 0.2);
+      left: 50%;
+      margin: calc(var(--s) / -2) 0 0 calc(var(--s) / -2);
+    }
+    .night-orb.sphere-ready {
+      touch-action: none;
+    }
+    .night-orb .orb-photo {
+      border-color: rgba(235, 240, 255, 0.9);
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.45), 0 0 12px rgba(150, 175, 255, 0.35);
     }
     /* Portrait phones: too narrow for two pages side by side, so the card
        opens upwards like a notepad and the pages turn over the top edge */
@@ -1303,9 +1374,9 @@
         transform: rotateX(14deg);
       }
       .letter.open .letter-cover,
-      .letter[data-page="2"] .leaf1,
-      .letter[data-page="3"] .leaf1,
-      .letter[data-page="3"] .leaf2 {
+      .letter:is([data-page="2"], [data-page="3"], [data-page="4"]) .leaf1,
+      .letter:is([data-page="3"], [data-page="4"]) .leaf2,
+      .letter[data-page="4"] .leaf3 {
         transform: rotateX(180deg);
       }
       .letter-face.flip {
@@ -1342,6 +1413,13 @@
       1.5% { opacity: 1; }
       7% { opacity: 0; transform: rotate(-28deg) translateX(-150px); }
       100% { opacity: 0; transform: rotate(-28deg) translateX(-150px); }
+    }
+    @keyframes moon-breathe {
+      0%, 100% { box-shadow: 0 0 30px 6px rgba(235, 235, 255, 0.22), 0 0 110px 34px rgba(170, 190, 255, 0.1); }
+      50% { box-shadow: 0 0 38px 10px rgba(235, 235, 255, 0.3), 0 0 130px 44px rgba(170, 190, 255, 0.16); }
+    }
+    @keyframes letter-out {
+      to { opacity: 0; transform: translateY(-30px) scale(0.85); filter: blur(4px); }
     }
     @keyframes twin-orbit {
       to { transform: rotate(360deg); }
@@ -1497,14 +1575,35 @@
           <button class="dive-btn no" id="dive-no">No</button>
         </div>
       </div>
+      <div class="orb-stage night-orb" id="night-orb" hidden></div>
       <div class="letter-stage" id="letter-stage" hidden>
         <div class="letter-float" id="letter-float">
           <div class="letter" id="letter" data-page="1" role="button" tabindex="0" aria-label="Open the card">
-            <!-- Third spread, right page: lies under the pages that turn -->
+            <!-- Last spread, right page: lies under the pages that turn -->
             <div class="letter-face right night-page">
-              <div class="letter-msg later on3">
-                <p class="letter-quiet">You are my world.</p>
+              <span class="letter-spark" style="top: 12%; left: 16%; font-size: 12px; animation-delay: -1.2s" aria-hidden="true">✦</span>
+              <span class="letter-spark" style="bottom: 18%; right: 14%; font-size: 10px; animation-delay: -0.4s" aria-hidden="true">✦</span>
+              <div class="letter-msg later on4">
+                <p class="letter-love">I love you.</p>
                 <p class="letter-mark">♡</p>
+              </div>
+              <button class="letter-turn close" id="letter-close" type="button" data-from="4">close ×</button>
+            </div>
+            <!-- Third message page -->
+            <div class="letter-leaf leaf3">
+              <div class="letter-face right night-page">
+                <span class="letter-spark" style="top: 9%; right: 13%; font-size: 12px; animation-delay: -1.9s" aria-hidden="true">✦</span>
+                <span class="letter-spark" style="bottom: 16%; left: 11%; font-size: 10px; animation-delay: -0.7s" aria-hidden="true">✦</span>
+                <span class="shoot" aria-hidden="true" style="animation-delay: 6s"></span>
+                <div class="letter-msg later on3">
+                  <p class="letter-quiet">You are my whole world, sweet baby.</p>
+                  <p class="letter-mark">♡</p>
+                </div>
+                <button class="letter-turn next" type="button" data-from="3" data-go="4">next page ›</button>
+              </div>
+              <div class="letter-face left flip night-page">
+                <span class="full-moon" aria-hidden="true"></span>
+                <button class="letter-turn prev" type="button" data-from="4" data-go="3">‹ previous page</button>
               </div>
             </div>
             <!-- Second message page; "next page" turns it over to the third spread -->
@@ -1923,7 +2022,7 @@
 
     // Heart shell: tap 1 shakes, tap 2 shakes harder and cracks, tap 3 breaks
     // it open. image1..image36 stream out into a swirling storm, then settle
-    // into a sphere that keeps spinning.
+    // into a sphere that keeps spinning. The night card reuses the storm.
     const shell = document.getElementById("shell");
     const orbStage = document.getElementById("orb-stage");
     const orbHint = document.getElementById("orb-hint");
@@ -1953,18 +2052,17 @@
       src.start(t);
     };
 
-    const startStorm = () => {
-      const photos = [];
-      for (let i = 1; i <= ORB_PHOTOS; i++) {
+    const startStorm = (stage, sources) => {
+      const photos = sources.map(src => {
         const img = document.createElement("img");
         img.className = "orb-photo";
-        img.src = `image${i}.png`;
+        img.src = src;
         img.alt = "";
         img.draggable = false;
         img.style.opacity = "0";
-        orbStage.appendChild(img);
-        photos.push(img);
-      }
+        stage.appendChild(img);
+        return img;
+      });
       const N = photos.length;
       const golden = Math.PI * (3 - Math.sqrt(5));
       const smooth = x => (x <= 0 ? 0 : x >= 1 ? 1 : x * x * (3 - 2 * x));
@@ -1982,7 +2080,7 @@
         const k = smooth((t - 6) / 2.2); // 0 = storm, 1 = sphere
         if (!sphereShown && k >= 1) {
           sphereShown = true;
-          orbStage.classList.add("sphere-ready");
+          stage.classList.add("sphere-ready");
         }
         // Auto-spin pauses while dragging; a flick keeps turning, then eases off
         if (!dragging) {
@@ -1993,7 +2091,7 @@
           vYaw *= decay;
           vPitch *= decay;
         }
-        const S = orbStage.clientWidth;
+        const S = stage.clientWidth;
         const R = S * 0.33, H = S * 0.28, F = S * 2.2;
         photos.forEach((img, i) => {
           // Storm: a funnel, wide at the top, narrow at the bottom
@@ -2032,7 +2130,7 @@
       // Drag to turn the sphere (on touch screens: swipe sideways,
       // so vertical swipes still scroll the page)
       let lastX = 0, lastY = 0, lastT = 0;
-      orbStage.addEventListener("pointerdown", e => {
+      stage.addEventListener("pointerdown", e => {
         if (!sphereShown) return;
         e.preventDefault();
         dragging = true;
@@ -2040,13 +2138,13 @@
         lastX = e.clientX;
         lastY = e.clientY;
         lastT = performance.now();
-        orbStage.classList.add("dragging");
-        orbStage.setPointerCapture(e.pointerId);
+        stage.classList.add("dragging");
+        stage.setPointerCapture(e.pointerId);
       });
-      orbStage.addEventListener("pointermove", e => {
+      stage.addEventListener("pointermove", e => {
         if (!dragging) return;
         const now = performance.now();
-        const sens = 3 / orbStage.clientWidth; // a full-width drag ≈ half a turn
+        const sens = 3 / stage.clientWidth; // a full-width drag ≈ half a turn
         const dYaw = -(e.clientX - lastX) * sens;
         const dPitch = -(e.clientY - lastY) * sens;
         const dts = Math.max(1, now - lastT) / 1000;
@@ -2061,18 +2159,18 @@
       const endDrag = () => {
         if (!dragging) return;
         dragging = false;
-        orbStage.classList.remove("dragging");
+        stage.classList.remove("dragging");
         // Held still before letting go: no flick
         if (performance.now() - lastT > 80) vYaw = vPitch = 0;
       };
-      orbStage.addEventListener("pointerup", endDrag);
-      orbStage.addEventListener("pointercancel", endDrag);
+      stage.addEventListener("pointerup", endDrag);
+      stage.addEventListener("pointercancel", endDrag);
 
       // Pause while scrolled out of view
       new IntersectionObserver(([entry]) => {
         visible = entry.isIntersecting;
         if (visible) run();
-      }).observe(orbStage);
+      }).observe(stage);
       run();
     };
 
@@ -2093,7 +2191,7 @@
         s.style.opacity = "0";
         setTimeout(() => s.remove(), 1300);
       }
-      startStorm();
+      startStorm(orbStage, Array.from({ length: ORB_PHOTOS }, (_, i) => `image${i + 1}.png`));
     };
 
     const tapShell = () => {
@@ -2305,6 +2403,7 @@
     const openLetter = () => {
       if (letter.classList.contains("open")) return;
       fitLetter();
+      findNightPhotos(); // start loading them while the card is read
       letter.classList.add("open");
       letterFloat.classList.add("still");
       // Once open it's a book with its own page buttons, not a button itself
@@ -2323,14 +2422,56 @@
     const turnPage = e => {
       e.stopPropagation();
       const to = e.currentTarget.dataset.go;
-      const forward = to > letter.dataset.page;
+      const forward = Number(to) > Number(letter.dataset.page);
       letter.dataset.page = to;
       withAudio(level => {
         tone(forward ? 659.25 : 587.33, 0, 0.9, 0.05 * level);
         tone(forward ? 880 : 783.99, 0.1, 1.1, 0.04 * level);
       });
     };
-    letter.querySelectorAll(".letter-turn").forEach(b => b.addEventListener("click", turnPage));
+    letter.querySelectorAll(".letter-turn[data-go]").forEach(b => b.addEventListener("click", turnPage));
+
+    // The night series photos (image1, image2, ... in "night series"): count
+    // how many there are by loading them in turn until one is missing
+    let nightPhotos = null;
+    const findNightPhotos = () => {
+      if (nightPhotos) return nightPhotos;
+      nightPhotos = new Promise(resolve => {
+        const found = [];
+        const tryNext = () => {
+          const img = new Image();
+          img.onload = () => {
+            found.push(img.src);
+            if (found.length < 60) tryNext(); else resolve(found);
+          };
+          img.onerror = () => resolve(found);
+          img.src = `night%20series/image${found.length + 1}.png`;
+        };
+        tryNext();
+      });
+      return nightPhotos;
+    };
+    // "close" on the last page: the card goes, then the photos storm out
+    // and settle into a sphere, the same way image1-image36 do
+    document.getElementById("letter-close").addEventListener("click", e => {
+      e.stopPropagation();
+      letterStage.classList.add("leaving");
+      withAudio(level => {
+        noise(0.5, 0.6, 0.25 * level, 1200);
+        [523.25, 783.99, 1046.5, 1318.5].forEach((f, i) => tone(f, 0.9 + i * 0.1, 1.2, 0.07 * level));
+      });
+      findNightPhotos().then(found => {
+        setTimeout(() => {
+          letterStage.hidden = true;
+          if (!found.length) return;
+          const nightOrb = document.getElementById("night-orb");
+          nightOrb.hidden = false;
+          // Enough tiles for a full sphere, cycling through the photos
+          const count = Math.max(36, found.length);
+          startStorm(nightOrb, Array.from({ length: count }, (_, i) => found[i % found.length]));
+        }, 1100);
+      });
+    });
 
     // Same speed for every row regardless of its width
     window.addEventListener("load", () => {
