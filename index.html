@@ -734,8 +734,9 @@
       opacity: 0;
       visibility: hidden;
     }
-    /* "Let's dive in." popup, styled after spiralstar.jpg: a night sky with
-       circling star trails over dark hills and a small stargazer */
+    /* "let's dive into the night" popup, styled after spiralstar.jpg: a night
+       sky with circling star trails over dark hills and a small stargazer.
+       "Yes" grows it to fill the screen and it stays on as the page background. */
     .dive {
       position: fixed;
       inset: 0;
@@ -747,28 +748,39 @@
       -webkit-backdrop-filter: blur(4px);
       backdrop-filter: blur(4px);
       opacity: 0;
-      transition: opacity 0.6s ease;
+      transition: opacity 0.6s ease, background-color 0.9s ease, backdrop-filter 0.9s ease;
     }
-    .dive[hidden] {
+    .dive[hidden],
+    .night-bg[hidden] {
       display: none;
     }
     .dive.show {
       opacity: 1;
     }
-    .dive.diving {
+    .dive.expanding {
+      background-color: rgba(12, 14, 46, 0);
+      -webkit-backdrop-filter: blur(0);
+      backdrop-filter: blur(0);
+    }
+    .dive.fading {
       opacity: 0;
-      transition: opacity 0.7s ease 0.6s;
+      transition: opacity 0.9s ease;
+    }
+    .dive-card,
+    .night-bg {
+      --hills: min(24cqw, 28cqh);
+      container-type: size;
+      overflow: hidden;
+      background:
+        radial-gradient(120% 70% at 62% 100%, rgba(186, 150, 255, 0.75), transparent 62%),
+        radial-gradient(90% 80% at 50% 34%, #2b3c9a 0%, transparent 70%),
+        linear-gradient(180deg, #0a0f35 0%, #18236a 55%, #3d3f9c 100%);
     }
     .dive-card {
       position: relative;
       width: min(440px, calc(100vw - 32px), calc((100vh - 32px) * 1.25));
       aspect-ratio: 5 / 4;
       border-radius: 26px;
-      overflow: hidden;
-      background:
-        radial-gradient(120% 70% at 62% 100%, rgba(186, 150, 255, 0.75), transparent 62%),
-        radial-gradient(90% 80% at 50% 34%, #2b3c9a 0%, transparent 70%),
-        linear-gradient(180deg, #0a0f35 0%, #18236a 55%, #3d3f9c 100%);
       box-shadow:
         0 24px 70px rgba(10, 12, 50, 0.6),
         0 0 44px rgba(120, 130, 255, 0.35),
@@ -779,34 +791,58 @@
     .dive.show .dive-card {
       transform: none;
     }
-    .dive.diving .dive-card {
-      transform: scale(1.7);
-      opacity: 0;
-      transition: transform 1.2s cubic-bezier(0.6, 0, 0.8, 0.4), opacity 0.8s ease 0.45s;
+    .dive-card.grow {
+      position: fixed;
+      transition: left 0.9s cubic-bezier(0.65, 0, 0.35, 1), top 0.9s cubic-bezier(0.65, 0, 0.35, 1),
+        width 0.9s cubic-bezier(0.65, 0, 0.35, 1), height 0.9s cubic-bezier(0.65, 0, 0.35, 1),
+        border-radius 0.9s ease, box-shadow 0.9s ease;
     }
-    .dive-sky,
-    .dive-hills {
+    .night-bg {
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+    }
+    .sky {
       position: absolute;
       inset: 0;
       width: 100%;
       height: 100%;
     }
+    .sky-hills {
+      position: absolute;
+      left: 0;
+      bottom: 0;
+      width: 100%;
+      height: var(--hills);
+    }
+    .sky-person {
+      position: absolute;
+      bottom: calc(var(--hills) * 0.483);
+      height: calc(var(--hills) * 0.267);
+      left: calc(14.4% - var(--hills) * 0.267 * 0.25);
+    }
     .dive-content {
       position: absolute;
-      top: 20%;
+      top: 0;
       left: 0;
       right: 0;
+      bottom: var(--hills);
       display: flex;
       flex-direction: column;
       align-items: center;
+      justify-content: center;
       padding: 0 16px;
       text-align: center;
+      transition: opacity 0.3s ease;
+    }
+    .dive-card.grow .dive-content {
+      opacity: 0;
     }
     .dive-title {
       margin: 0;
       color: #fff;
-      font: 400 clamp(2.4rem, 10vw, 3.4rem) "Great Vibes", cursive;
-      line-height: 1.25;
+      font: 400 clamp(2.1rem, 8.5vw, 3rem) "Great Vibes", cursive;
+      line-height: 1.2;
       text-shadow: 0 0 10px rgba(190, 200, 255, 0.9), 0 0 28px rgba(140, 120, 255, 0.7);
     }
     .dive-title.swap {
@@ -854,6 +890,22 @@
     .dive-btn.gone {
       opacity: 0;
       pointer-events: none;
+    }
+    /* Once the night sky is the background, light text keeps things readable */
+    body.night {
+      background: #0a0f35;
+    }
+    body.night h1,
+    body.night .love,
+    body.night .locket-hint,
+    body.night .card-hint,
+    body.night .orb-hint {
+      color: #ffd3e4;
+      text-shadow: 0 0 12px rgba(255, 110, 170, 0.55);
+    }
+    body.night .orb-caption {
+      color: #ffd3e4;
+      text-shadow: 0 0 10px rgba(255, 110, 170, 0.75), 0 0 2px rgba(10, 15, 53, 0.9);
     }
     @keyframes dive-swap {
       from { opacity: 0; transform: translateY(6px); }
@@ -973,13 +1025,18 @@
   </section>
   <audio id="song" src="Mitski%20-%20My%20Love%20Mine%20All%20Mine%20(Official%20Lyric%20Video).mp3" loop preload="auto"></audio>  <div class="rain" id="rain" aria-hidden="true"></div>
   <button class="intro" id="intro">For Elle 💖</button>
+  <div class="night-bg" id="night-bg" aria-hidden="true" hidden>
+    <canvas class="sky" id="night-sky"></canvas>
+  </div>
   <div class="dive" id="dive" role="dialog" aria-modal="true" aria-labelledby="dive-title" hidden>
-    <div class="dive-card">
-      <canvas class="dive-sky" id="dive-sky" aria-hidden="true"></canvas>
-      <svg class="dive-hills" viewBox="0 0 500 400" preserveAspectRatio="none" aria-hidden="true">
+    <div class="dive-card" id="dive-card">
+      <canvas class="sky" id="dive-sky" aria-hidden="true"></canvas>
+      <svg class="sky-hills" viewBox="0 280 500 120" preserveAspectRatio="none" aria-hidden="true">
         <path fill="#2a2768" opacity="0.85" d="M0 330 Q55 312 105 326 T215 306 T330 296 T425 314 T500 300 V400 H0Z"/>
         <path fill="#151642" d="M0 346 Q60 334 112 342 T230 336 T350 344 T500 334 V400 H0Z"/>
         <path fill="#07081f" d="M0 356 Q35 341 72 340 Q108 340 140 356 Q190 378 255 372 Q330 366 385 378 Q445 390 500 382 V400 H0Z"/>
+      </svg>
+      <svg class="sky-person" viewBox="64 310 20 32" aria-hidden="true">
         <g fill="#07081f">
           <circle cx="72" cy="318.5" r="3.4"/>
           <path d="M68.6 323.5 Q72 321.5 75.4 323.5 L76.4 333 L74.6 333.4 L74.2 341 L72.7 341 L72 334 L71.3 341 L69.8 341 L69.4 333.4 L67.6 333 Z"/>
@@ -987,7 +1044,7 @@
         </g>
       </svg>
       <div class="dive-content">
-        <h2 class="dive-title" id="dive-title">Let's dive in.</h2>
+        <h2 class="dive-title" id="dive-title">let's dive into the night</h2>
         <div class="dive-buttons">
           <button class="dive-btn yes" id="dive-yes">Yes</button>
           <button class="dive-btn no" id="dive-no">No</button>
@@ -1537,16 +1594,24 @@
     });
 
     // After 30 seconds on the page (only counting while the tab is in view)
-    // a starry "Let's dive in." popup appears. Each "No" makes "Yes" bigger
-    // and "No" smaller until "No" fades away; "Yes" dives into the stars.
+    // a starry "let's dive into the night" popup appears. Each "No" makes
+    // "Yes" bigger and "No" smaller until "No" fades away. "Yes" grows the
+    // night sky to fill the screen, where it stays as the page background.
     const dive = document.getElementById("dive");
-    const diveSky = document.getElementById("dive-sky");
+    const diveCard = document.getElementById("dive-card");
     const diveTitle = document.getElementById("dive-title");
     const diveYes = document.getElementById("dive-yes");
     const diveNo = document.getElementById("dive-no");
-    const skyCtx = diveSky.getContext("2d");
+    const nightBg = document.getElementById("night-bg");
+    // The background gets the same hills and stargazer as the card
+    diveCard.querySelectorAll(".sky-hills, .sky-person").forEach(el => nightBg.appendChild(el.cloneNode(true)));
+    const skies = ["dive-sky", "night-sky"].map(id => {
+      const canvas = document.getElementById(id);
+      return { canvas, ctx: canvas.getContext("2d"), on: false };
+    });
+    const CARD_TRAILS = 170; // the full screen shows more trails than the card
     const TRAIL_COLORS = ["255,255,255", "255,255,255", "200,214,255", "255,214,240"];
-    const trails = Array.from({ length: 170 }, () => ({
+    const trails = Array.from({ length: 320 }, () => ({
       r: 0.02 + Math.random() * 0.98, // share of the largest radius
       a: Math.random() * Math.PI * 2,
       len: 0.25 + Math.random() * 1.1, // arc length in radians
@@ -1554,52 +1619,66 @@
       alpha: 0.25 + Math.random() * 0.65,
       color: TRAIL_COLORS[Math.floor(Math.random() * TRAIL_COLORS.length)]
     }));
-    let skyRaf = 0, skyLast = 0, skyCenterY = 0.36, warp = 0, warpStart = 0;
-    const sizeSky = () => {
-      const dpr = Math.min(window.devicePixelRatio || 1, 2);
-      diveSky.width = diveSky.clientWidth * dpr;
-      diveSky.height = diveSky.clientHeight * dpr;
-      // The trails circle around the title, like the pole star in the photo
-      const c = diveSky.getBoundingClientRect();
-      const t = diveTitle.getBoundingClientRect();
-      skyCenterY = (t.top + t.height / 2 - c.top) / c.height;
+    let skyRaf = 0, skyLast = 0, skyCenterY = 0.36, yesAt = 0;
+    // Stars speed up as the sky grows, then settle back to a slow turn
+    const warpAt = t => {
+      if (t < 0.5) return t / 0.5;
+      if (t < 1) return 1;
+      const k = Math.min((t - 1) / 1.4, 1);
+      return 1 - k * k * (3 - 2 * k);
     };
-    const drawSky = now => {
-      const dt = Math.min((now - (skyLast || now)) / 1000, 0.05);
-      skyLast = now;
-      if (warpStart) warp = Math.min((now - warpStart) / 1100, 1);
-      const W = diveSky.width, H = diveSky.height;
-      const dpr = W / diveSky.clientWidth;
+    const paintSky = ({ canvas, ctx }, now, warp, extra) => {
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      const cw = canvas.clientWidth, ch = canvas.clientHeight;
+      if (!cw || !ch) return;
+      const W = Math.round(cw * dpr), H = Math.round(ch * dpr);
+      if (canvas.width !== W || canvas.height !== H) {
+        canvas.width = W;
+        canvas.height = H;
+      }
+      // The trails circle around the title, like the pole star in the photo
       const cx = W / 2, cy = H * skyCenterY;
       const maxR = Math.hypot(cx, Math.max(cy, H - cy));
-      const spin = 0.06 + warp * warp * 3;
-      const stretch = 1 + warp * 1.8;
+      const stretch = 1 + extra * 0.5 + warp * 1.8;
+      const count = CARD_TRAILS + Math.round((trails.length - CARD_TRAILS) * extra);
       const PARTS = 4;
-      skyCtx.clearRect(0, 0, W, H);
-      skyCtx.lineCap = "round";
-      for (const s of trails) {
-        s.a -= spin * dt; // counter-clockwise
+      ctx.clearRect(0, 0, W, H);
+      ctx.lineCap = "round";
+      for (let i = 0; i < count; i++) {
+        const s = trails[i];
         const r = s.r * maxR;
         const len = Math.min(s.len * stretch, 5.5);
         const glow = s.alpha * (0.85 + 0.15 * Math.sin(now / 600 + s.r * 40));
-        skyCtx.lineWidth = s.w * dpr;
+        ctx.lineWidth = s.w * dpr;
         // The head is brightest; the tail fades out behind it
         for (let p = 0; p < PARTS; p++) {
-          skyCtx.beginPath();
-          skyCtx.arc(cx, cy, r, s.a + len * p / PARTS, s.a + len * (p + 1) / PARTS);
-          skyCtx.strokeStyle = `rgba(${s.color},${glow * (1 - p / PARTS)})`;
-          skyCtx.stroke();
+          ctx.beginPath();
+          ctx.arc(cx, cy, r, s.a + len * p / PARTS, s.a + len * (p + 1) / PARTS);
+          ctx.strokeStyle = `rgba(${s.color},${glow * (1 - p / PARTS)})`;
+          ctx.stroke();
         }
       }
-      skyRaf = requestAnimationFrame(drawSky);
+    };
+    const drawSkies = now => {
+      const dt = Math.min((now - (skyLast || now)) / 1000, 0.05);
+      skyLast = now;
+      const warp = yesAt ? warpAt((now - yesAt) / 1000) : 0;
+      const grown = yesAt ? Math.min((now - yesAt) / 1050, 1) : 0;
+      const spin = 0.05 + warp * warp * 3;
+      for (const s of trails) s.a -= spin * dt; // counter-clockwise
+      if (skies[0].on) paintSky(skies[0], now, warp, grown);
+      if (skies[1].on) paintSky(skies[1], now, warp, 1);
+      skyRaf = requestAnimationFrame(drawSkies);
     };
     const showDive = () => {
       dive.hidden = false;
       void dive.offsetWidth; // let the fade-in transition run
       dive.classList.add("show");
-      sizeSky();
-      skyLast = 0;
-      skyRaf = requestAnimationFrame(drawSky);
+      const c = diveCard.getBoundingClientRect();
+      const t = diveTitle.getBoundingClientRect();
+      skyCenterY = (t.top + t.height / 2 - c.top) / c.height;
+      skies[0].on = true;
+      skyRaf = requestAnimationFrame(drawSkies);
       diveYes.focus({ preventScroll: true });
       withAudio(level => [784, 1046.5, 1318.5].forEach((f, i) => tone(f, i * 0.12, 1.4, 0.07 * level)));
     };
@@ -1614,9 +1693,6 @@
         showDive();
       }
     }, 250);
-    window.addEventListener("resize", () => {
-      if (!dive.hidden) sizeSky();
-    });
     // The page behind stays put while the popup is up
     ["wheel", "touchmove"].forEach(type =>
       dive.addEventListener(type, e => e.preventDefault(), { passive: false }));
@@ -1642,16 +1718,30 @@
     diveYes.addEventListener("click", () => {
       if (dived) return;
       dived = true;
-      warpStart = performance.now();
-      dive.classList.add("diving");
+      yesAt = performance.now();
+      // Pin the card where it is, then let it grow to cover the whole screen
+      const r = diveCard.getBoundingClientRect();
+      diveCard.classList.add("grow");
+      Object.assign(diveCard.style, { left: `${r.left}px`, top: `${r.top}px`, width: `${r.width}px`, height: `${r.height}px` });
+      void diveCard.offsetWidth;
+      Object.assign(diveCard.style, { left: "0px", top: "0px", width: "100%", height: "100%", borderRadius: "0px", boxShadow: "none" });
+      dive.classList.add("expanding");
       withAudio(level => [523.25, 659.25, 783.99, 1046.5, 1318.5, 1568, 2093].forEach((f, i) => {
         tone(f, i * 0.07, 1.2, 0.12 * level);
         tone(f * 2, i * 0.07, 0.5, 0.03 * level);
       }));
+      // Once it covers the screen, the same sky waits behind the page and
+      // the popup fades away to show the page on top of it
       setTimeout(() => {
-        cancelAnimationFrame(skyRaf);
+        nightBg.hidden = false;
+        skies[1].on = true;
+        document.body.classList.add("night");
+        dive.classList.add("fading");
+      }, 1050);
+      setTimeout(() => {
         dive.hidden = true;
-      }, 1400);
+        skies[0].on = false;
+      }, 2000);
     });
 
     // Same speed for every row regardless of its width
