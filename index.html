@@ -826,6 +826,74 @@
       outline: none;
       -webkit-tap-highlight-color: transparent;
     }
+    /* Three cats sitting in a row beside the couple; hovering (or tapping)
+       one shows its name */
+    .night-cats {
+      --cat: calc(var(--hills) * 0.075);
+      position: absolute;
+      z-index: 2;
+      left: calc(14.4% + var(--hills) * 0.1);
+      bottom: calc(var(--hills) * 0.49);
+      display: flex;
+      align-items: flex-end;
+      gap: calc(var(--hills) * 0.02);
+    }
+    .night-cat {
+      position: relative;
+      width: calc(var(--cat) * 0.833);
+      height: var(--cat);
+      padding: 0;
+      border: 0;
+      background: none;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .night-cat.small {
+      width: calc(var(--cat) * 0.7);
+      height: calc(var(--cat) * 0.84);
+    }
+    /* Taller to tap, and as wide as half the gap on each side so
+       neighbouring cats never overlap */
+    .night-cat::after {
+      content: "";
+      position: absolute;
+      inset: -8px calc(var(--hills) * -0.01);
+    }
+    .night-cat:focus-visible {
+      outline: none;
+    }
+    .night-cat svg {
+      display: block;
+      width: 100%;
+      height: 100%;
+      overflow: visible;
+    }
+    .night-cat.flip svg {
+      transform: scaleX(-1);
+    }
+    .cat-name {
+      position: absolute;
+      bottom: calc(100% + 6px);
+      left: 50%;
+      padding: 3px 9px;
+      border: 1px solid rgba(200, 212, 245, 0.35);
+      border-radius: 999px;
+      background: rgba(8, 14, 44, 0.85);
+      color: #eef1ff;
+      font: 400 13px/1.2 "Glacial Indifference", "Segoe UI", sans-serif;
+      letter-spacing: 0.05em;
+      white-space: nowrap;
+      pointer-events: none;
+      opacity: 0;
+      transform: translate(-50%, 4px);
+      transition: opacity 0.25s ease, transform 0.25s ease;
+    }
+    .night-cat:hover .cat-name,
+    .night-cat:focus-visible .cat-name,
+    .night-cat.named .cat-name {
+      opacity: 1;
+      transform: translate(-50%, 0);
+    }
     /* A bigger invisible area to tap, as they are small on phones */
     .night-couple::after {
       content: "";
@@ -1599,6 +1667,32 @@
       <svg viewBox="-34 -108 84 112" aria-hidden="true">
         <g class="couple-figures" stroke-linecap="round" stroke-linejoin="round"></g>
       </svg>
+      </div>
+      <div class="night-cats">
+        <button class="night-cat" type="button">
+          <svg viewBox="0 0 20 24" aria-hidden="true">
+            <defs>
+              <symbol id="cat-sitting" viewBox="0 0 20 24">
+                <g fill="#030714">
+                  <path d="M5.6 5.4 L6.2 0.4 L9.2 3.2 Z M14.4 5.4 L13.8 0.4 L10.8 3.2 Z"/>
+                  <circle cx="10" cy="7.6" r="4.9"/>
+                  <path d="M4.2 24 C3.4 18.5 5 13.6 7.6 11.8 L12.4 11.8 C15 13.6 16.6 18.5 15.8 24 Z"/>
+                </g>
+                <path d="M15.2 23.4 C19.6 23.2 20.2 19 18.4 16.6" fill="none" stroke="#030714" stroke-width="2" stroke-linecap="round"/>
+              </symbol>
+            </defs>
+            <use href="#cat-sitting"/>
+          </svg>
+          <span class="cat-name">mawmaw</span>
+        </button>
+        <button class="night-cat flip" type="button">
+          <svg viewBox="0 0 20 24" aria-hidden="true"><use href="#cat-sitting"/></svg>
+          <span class="cat-name">mokong</span>
+        </button>
+        <button class="night-cat small" type="button">
+          <svg viewBox="0 0 20 24" aria-hidden="true"><use href="#cat-sitting"/></svg>
+          <span class="cat-name">gorou</span>
+        </button>
       </div>
       <div class="dive-content" id="dive-content">
         <h2 class="dive-title" id="dive-title">let's dive into the night</h2>
@@ -2554,6 +2648,16 @@
       }
     });
     updateCouple(performance.now());
+
+    // The cats' names show on hover; on a phone a tap shows one for a moment
+    document.querySelectorAll(".night-cat").forEach(cat => {
+      let timer = 0;
+      cat.addEventListener("click", () => {
+        cat.classList.add("named");
+        clearTimeout(timer);
+        timer = setTimeout(() => cat.classList.remove("named"), 1800);
+      });
+    });
 
     let seenMs = 0, seenLast = performance.now();
     const diveTimer = setInterval(() => {
