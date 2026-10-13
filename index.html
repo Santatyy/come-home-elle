@@ -2405,6 +2405,59 @@
       const k = Math.min((t - 1) / 1.4, 1);
       return 1 - k * k * (3 - 2 * k);
     };
+    // A shooting star every few seconds: a bright head streaking down at a
+    // slant, with a tail that fades out behind it
+    const comets = [];
+    let nextComet = 0;
+    const paintComets = (ctx, W, H, dpr, now) => {
+      if (!nextComet) nextComet = now + 2000 + Math.random() * 3000;
+      if (now > nextComet) {
+        nextComet = now + 3000 + Math.random() * 6000;
+        const diag = Math.hypot(W, H);
+        const dir = Math.random() < 0.5 ? -1 : 1;
+        const ang = (18 + Math.random() * 24) * Math.PI / 180; // below the horizon line
+        comets.push({
+          x: W * (0.15 + Math.random() * 0.7),
+          y: H * (0.04 + Math.random() * 0.3),
+          vx: dir * Math.cos(ang),
+          vy: Math.sin(ang),
+          speed: diag * (0.45 + Math.random() * 0.35), // px per second
+          len: diag * (0.1 + Math.random() * 0.08),
+          born: now,
+          life: 900 + Math.random() * 700
+        });
+      }
+      for (let i = comets.length - 1; i >= 0; i--) {
+        const c = comets[i];
+        const age = (now - c.born) / c.life;
+        if (age >= 1) {
+          comets.splice(i, 1);
+          continue;
+        }
+        const d = c.speed * (now - c.born) / 1000;
+        const hx = c.x + c.vx * d, hy = c.y + c.vy * d;
+        const tail = c.len * Math.min(1, age * 4);
+        const tx = hx - c.vx * tail, ty = hy - c.vy * tail;
+        const fade = age < 0.15 ? age / 0.15 : 1 - (age - 0.15) / 0.85;
+        const streak = ctx.createLinearGradient(hx, hy, tx, ty);
+        streak.addColorStop(0, `rgba(255,255,255,${0.95 * fade})`);
+        streak.addColorStop(0.3, `rgba(205,218,255,${0.45 * fade})`);
+        streak.addColorStop(1, "rgba(205,218,255,0)");
+        ctx.strokeStyle = streak;
+        ctx.lineWidth = 2 * dpr;
+        ctx.beginPath();
+        ctx.moveTo(tx, ty);
+        ctx.lineTo(hx, hy);
+        ctx.stroke();
+        const head = ctx.createRadialGradient(hx, hy, 0, hx, hy, 6 * dpr);
+        head.addColorStop(0, `rgba(255,255,255,${0.9 * fade})`);
+        head.addColorStop(1, "rgba(255,255,255,0)");
+        ctx.fillStyle = head;
+        ctx.beginPath();
+        ctx.arc(hx, hy, 6 * dpr, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    };
     const paintSky = (now, warp, extra) => {
       const canvas = diveSky, ctx = skyCtx;
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
@@ -2437,6 +2490,7 @@
           ctx.stroke();
         }
       }
+      paintComets(ctx, W, H, dpr, now);
     };
     const drawSkies = now => {
       const dt = Math.min((now - (skyLast || now)) / 1000, 0.05);
