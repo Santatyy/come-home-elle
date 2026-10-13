@@ -812,10 +812,11 @@
       width: 100%;
       height: var(--hills);
     }
-    /* The couple standing on the left hill. In the drawing their feet are on
-       y = 0, 3.6% up from the bottom, and he stands 40.5% of the way across */
+    /* The couple standing on the left hill, as tall as the first stargazer.
+       In the drawing their feet are on y = 0, 3.6% up from the bottom, and
+       he stands 40.5% of the way across */
     .night-couple {
-      --ch: clamp(40px, calc(var(--hills) * 0.5), 150px);
+      --ch: calc(var(--hills) * 0.236);
       position: absolute;
       bottom: calc(var(--hills) * 0.483 - var(--ch) * 0.036);
       left: calc(14.4% - var(--ch) * 0.75 * 0.405);
@@ -836,16 +837,6 @@
       width: 100%;
       height: 100%;
       overflow: visible;
-    }
-    .couple-heart {
-      position: absolute;
-      color: #ff8cc6;
-      font-size: 14px;
-      line-height: 1;
-      text-shadow: 0 0 6px rgba(255, 140, 198, 0.8);
-      pointer-events: none;
-      opacity: 0;
-      animation: couple-heart 2.2s ease-out forwards;
     }
     .dive-content {
       position: absolute;
@@ -1460,10 +1451,6 @@
     @keyframes night-gallery-in {
       from { opacity: 0; transform: translateX(6%); }
     }
-    @keyframes couple-heart {
-      20% { opacity: 1; }
-      to { opacity: 0; transform: translateY(-60px) scale(1.2); }
-    }
     @keyframes letter-out {
       to { opacity: 0; transform: translateY(-30px) scale(0.85); filter: blur(4px); }
     }
@@ -1610,16 +1597,7 @@
       </svg>
       <div class="night-couple" id="couple" role="button" tabindex="0" aria-label="Make them dance">
       <svg viewBox="-34 -108 84 112" aria-hidden="true">
-        <defs>
-          <filter id="couple-glow" x="-30%" y="-30%" width="160%" height="160%">
-            <feGaussianBlur stdDeviation="1.4" result="glow"/>
-            <feMerge>
-              <feMergeNode in="glow"/>
-              <feMergeNode in="SourceGraphic"/>
-            </feMerge>
-          </filter>
-        </defs>
-        <g class="couple-figures" filter="url(#couple-glow)" stroke-linecap="round" stroke-linejoin="round"></g>
+        <g class="couple-figures" stroke-linecap="round" stroke-linejoin="round"></g>
       </svg>
       </div>
       <div class="dive-content" id="dive-content">
@@ -2390,14 +2368,15 @@
     };
     // The couple on the hill: he holds her in a princess carry. A tap makes
     // them dance with him leading (set down, sway, a twirl under his arm, a
-    // dip), and at the end he scoops her up again. Each figure is posed by
-    // two-bone IK: hands and feet reach for target points, and every frame
-    // the targets move from one pose to the next.
+    // dip), and at the end he scoops her up again. Both are black
+    // silhouettes like the hills. Each figure is posed by two-bone IK: hands
+    // and feet reach for target points, and every frame the targets move
+    // from one pose to the next.
     const couple = document.getElementById("couple");
     const SVG_NS = "http://www.w3.org/2000/svg";
     const BODY = {
-      m: { torso: 34, shoulder: 9, arm: [16, 15], leg: [25, 25], hip: 4, head: 7, neck: 4, limb: 6, trunk: 12, color: "#ffd24d" },
-      w: { torso: 29, shoulder: 7, arm: [14, 13], leg: [22, 22], hip: 3.5, head: 6.5, neck: 3, limb: 5, trunk: 9, color: "#ff8cc6" }
+      m: { torso: 34, shoulder: 9, arm: [16, 15], leg: [25, 25], hip: 4, head: 7, neck: 4, limb: 6, trunk: 12, color: "#030714" },
+      w: { torso: 29, shoulder: 7, arm: [14, 13], leg: [22, 22], hip: 3.5, head: 6.5, neck: 3, limb: 5, trunk: 9, color: "#030714" }
     };
     const svgEl = (tag, attrs, parent) => {
       const el = document.createElementNS(SVG_NS, tag);
@@ -2420,7 +2399,7 @@
       },
       w: { group: womanBody, legs: [limb(womanBody, BODY.w), limb(womanBody, BODY.w)] }
     };
-    parts.w.hair = svgEl("line", { "stroke-width": 11, stroke: "#e2649f" }, womanBody);
+    parts.w.hair = svgEl("line", { "stroke-width": 11 }, womanBody);
     parts.w.dress = svgEl("polygon", { stroke: "none" }, womanBody);
     parts.w.torso = svgEl("line", { "stroke-width": BODY.w.trunk }, womanBody);
     parts.w.arms = [limb(womanBody, BODY.w), limb(womanBody, BODY.w)];
@@ -2543,10 +2522,7 @@
           }
           t -= step.dur;
         }
-        if (!P) {
-          danceStart = 0;
-          coupleHearts();
-        }
+        if (!P) danceStart = 0;
       }
       if (!P) {
         // Resting in his arms: slow breathing, her feet swaying a little
@@ -2564,19 +2540,6 @@
       }
       placeFigure("m", P.m);
       placeFigure("w", P.w);
-    };
-    // A few little hearts float up when he has her in his arms again
-    const coupleHearts = () => {
-      for (let i = 0; i < 3; i++) {
-        const h = document.createElement("span");
-        h.className = "couple-heart";
-        h.textContent = "♥";
-        h.style.left = `${couple.offsetLeft + couple.offsetWidth * (0.35 + Math.random() * 0.3)}px`;
-        h.style.top = `${couple.offsetTop}px`;
-        h.style.animationDelay = `${i * 0.25}s`;
-        h.addEventListener("animationend", () => h.remove());
-        diveCard.appendChild(h);
-      }
     };
     const startDance = () => {
       if (danceStart) return;
