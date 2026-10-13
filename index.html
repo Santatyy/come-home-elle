@@ -812,11 +812,40 @@
       width: 100%;
       height: var(--hills);
     }
-    .sky-person {
+    /* The couple standing on the left hill. In the drawing their feet are on
+       y = 0, 3.6% up from the bottom, and he stands 40.5% of the way across */
+    .night-couple {
+      --ch: clamp(40px, calc(var(--hills) * 0.5), 150px);
       position: absolute;
-      bottom: calc(var(--hills) * 0.483);
-      height: calc(var(--hills) * 0.267);
-      left: calc(14.4% - var(--hills) * 0.267 * 0.25);
+      bottom: calc(var(--hills) * 0.483 - var(--ch) * 0.036);
+      left: calc(14.4% - var(--ch) * 0.75 * 0.405);
+      width: calc(var(--ch) * 0.75);
+      height: var(--ch);
+      cursor: pointer;
+      outline: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+    /* A bigger invisible area to tap, as they are small on phones */
+    .night-couple::after {
+      content: "";
+      position: absolute;
+      inset: -14px;
+    }
+    .night-couple svg {
+      display: block;
+      width: 100%;
+      height: 100%;
+      overflow: visible;
+    }
+    .couple-heart {
+      position: absolute;
+      color: #ff8cc6;
+      font-size: 14px;
+      line-height: 1;
+      text-shadow: 0 0 6px rgba(255, 140, 198, 0.8);
+      pointer-events: none;
+      opacity: 0;
+      animation: couple-heart 2.2s ease-out forwards;
     }
     .dive-content {
       position: absolute;
@@ -910,8 +939,10 @@
       align-items: center;
       justify-content: center;
       padding-bottom: calc(var(--hills) * 0.35);
+      pointer-events: none; /* the couple underneath stays tappable */
     }
     .letter-float {
+      pointer-events: auto;
       animation: letter-in 0.9s cubic-bezier(0.2, 0.9, 0.3, 1.1) both, letter-bob 5s ease-in-out 0.9s infinite;
     }
     .letter-float.still {
@@ -1355,7 +1386,11 @@
       flex-direction: column;
       justify-content: center;
       overflow: hidden;
+      pointer-events: none;
       animation: night-gallery-in 1.6s ease both;
+    }
+    .night-gallery .row {
+      pointer-events: auto;
     }
     .night-gallery[hidden] {
       display: none;
@@ -1424,6 +1459,10 @@
     }
     @keyframes night-gallery-in {
       from { opacity: 0; transform: translateX(6%); }
+    }
+    @keyframes couple-heart {
+      20% { opacity: 1; }
+      to { opacity: 0; transform: translateY(-60px) scale(1.2); }
     }
     @keyframes letter-out {
       to { opacity: 0; transform: translateY(-30px) scale(0.85); filter: blur(4px); }
@@ -1569,13 +1608,20 @@
         <path fill="#0b1638" d="M0 346 Q60 334 112 342 T230 336 T350 344 T500 334 V400 H0Z"/>
         <path fill="#030714" d="M0 356 Q35 341 72 340 Q108 340 140 356 Q190 378 255 372 Q330 366 385 378 Q445 390 500 382 V400 H0Z"/>
       </svg>
-      <svg class="sky-person" viewBox="64 310 20 32" aria-hidden="true">
-        <g fill="#030714">
-          <circle cx="72" cy="318.5" r="3.4"/>
-          <path d="M68.6 323.5 Q72 321.5 75.4 323.5 L76.4 333 L74.6 333.4 L74.2 341 L72.7 341 L72 334 L71.3 341 L69.8 341 L69.4 333.4 L67.6 333 Z"/>
-          <path d="M75 324.5 L80.5 313" stroke="#030714" stroke-width="1.8" stroke-linecap="round"/>
-        </g>
+      <div class="night-couple" id="couple" role="button" tabindex="0" aria-label="Make them dance">
+      <svg viewBox="-34 -108 84 112" aria-hidden="true">
+        <defs>
+          <filter id="couple-glow" x="-30%" y="-30%" width="160%" height="160%">
+            <feGaussianBlur stdDeviation="1.4" result="glow"/>
+            <feMerge>
+              <feMergeNode in="glow"/>
+              <feMergeNode in="SourceGraphic"/>
+            </feMerge>
+          </filter>
+        </defs>
+        <g class="couple-figures" filter="url(#couple-glow)" stroke-linecap="round" stroke-linejoin="round"></g>
       </svg>
+      </div>
       <div class="dive-content" id="dive-content">
         <h2 class="dive-title" id="dive-title">let's dive into the night</h2>
         <div class="dive-buttons">
@@ -2328,6 +2374,7 @@
       const spin = 0.05 + warp * warp * 3;
       for (const s of trails) s.a -= spin * dt; // counter-clockwise
       paintSky(now, warp, grown);
+      updateCouple(now);
       skyRaf = requestAnimationFrame(drawSkies);
     };
     const showDive = () => {
@@ -2341,6 +2388,210 @@
       diveYes.focus({ preventScroll: true });
       withAudio(level => [784, 1046.5, 1318.5].forEach((f, i) => tone(f, i * 0.12, 1.4, 0.07 * level)));
     };
+    // The couple on the hill: he holds her in a princess carry. A tap makes
+    // them dance with him leading (set down, sway, a twirl under his arm, a
+    // dip), and at the end he scoops her up again. Each figure is posed by
+    // two-bone IK: hands and feet reach for target points, and every frame
+    // the targets move from one pose to the next.
+    const couple = document.getElementById("couple");
+    const SVG_NS = "http://www.w3.org/2000/svg";
+    const BODY = {
+      m: { torso: 34, shoulder: 9, arm: [16, 15], leg: [25, 25], hip: 4, head: 7, neck: 4, limb: 6, trunk: 12, color: "#ffd24d" },
+      w: { torso: 29, shoulder: 7, arm: [14, 13], leg: [22, 22], hip: 3.5, head: 6.5, neck: 3, limb: 5, trunk: 9, color: "#ff8cc6" }
+    };
+    const svgEl = (tag, attrs, parent) => {
+      const el = document.createElementNS(SVG_NS, tag);
+      for (const k in attrs) el.setAttribute(k, attrs[k]);
+      parent.appendChild(el);
+      return el;
+    };
+    // His body, then her, then his arms, so his arms hold her from the front
+    const figures = couple.querySelector(".couple-figures");
+    const layer = color => svgEl("g", { fill: color, stroke: color }, figures);
+    const manBody = layer(BODY.m.color), womanBody = layer(BODY.w.color), manArms = layer(BODY.m.color);
+    const limb = (g, b) => svgEl("polyline", { fill: "none", "stroke-width": b.limb }, g);
+    const parts = {
+      m: {
+        group: manBody,
+        legs: [limb(manBody, BODY.m), limb(manBody, BODY.m)],
+        torso: svgEl("line", { "stroke-width": BODY.m.trunk }, manBody),
+        head: svgEl("circle", { r: BODY.m.head, stroke: "none" }, manBody),
+        arms: [limb(manArms, BODY.m), limb(manArms, BODY.m)]
+      },
+      w: { group: womanBody, legs: [limb(womanBody, BODY.w), limb(womanBody, BODY.w)] }
+    };
+    parts.w.hair = svgEl("line", { "stroke-width": 11, stroke: "#e2649f" }, womanBody);
+    parts.w.dress = svgEl("polygon", { stroke: "none" }, womanBody);
+    parts.w.torso = svgEl("line", { "stroke-width": BODY.w.trunk }, womanBody);
+    parts.w.arms = [limb(womanBody, BODY.w), limb(womanBody, BODY.w)];
+    parts.w.head = svgEl("circle", { r: BODY.w.head, stroke: "none" }, womanBody);
+
+    // Elbow/knee placement: [start, joint, end] reaching from (sx, sy) to the
+    // target, bending to one side or the other by the sign of bend
+    const reach = (sx, sy, tx, ty, a, b, bend) => {
+      const d = Math.min(Math.max(Math.hypot(tx - sx, ty - sy), Math.abs(a - b) + 0.01), a + b - 0.01);
+      const base = Math.atan2(ty - sy, tx - sx);
+      const ang = base + bend * Math.acos((a * a + d * d - b * b) / (2 * a * d));
+      return [sx, sy, sx + a * Math.cos(ang), sy + a * Math.sin(ang), sx + d * Math.cos(base), sy + d * Math.sin(base)];
+    };
+    const points = j => `${j[0]},${j[1]} ${j[2]},${j[3]} ${j[4]},${j[5]}`;
+    const setLine = (el, x1, y1, x2, y2) => {
+      el.setAttribute("x1", x1);
+      el.setAttribute("y1", y1);
+      el.setAttribute("x2", x2);
+      el.setAttribute("y2", y2);
+    };
+    // A pose: hip at (x, y), body leaning t degrees (+ = to the right), sx < 1
+    // squeezes the figure sideways for a spin, and each hand/foot is
+    // [x, y, bend]. Feet stand on y = 0.
+    const placeFigure = (key, p) => {
+      const b = BODY[key], el = parts[key];
+      const t = p.t * Math.PI / 180;
+      const ux = Math.sin(t), uy = -Math.cos(t); // up the body
+      const px = Math.cos(t), py = Math.sin(t); // across it, to the right
+      const nx = p.x + ux * b.torso, ny = p.y + uy * b.torso;
+      const hx = nx + ux * (b.neck + b.head), hy = ny + uy * (b.neck + b.head);
+      setLine(el.torso, p.x, p.y, nx, ny);
+      el.head.setAttribute("cx", hx);
+      el.head.setAttribute("cy", hy);
+      const legs = ["l", "r"].map((side, i) => {
+        const s = i ? 1 : -1;
+        const f = p.feet[side];
+        return reach(p.x + px * b.hip * s, p.y + py * b.hip * s, f[0], f[1], b.leg[0], b.leg[1], f[2]);
+      });
+      legs.forEach((j, i) => el.legs[i].setAttribute("points", points(j)));
+      ["l", "r"].forEach((side, i) => {
+        const s = i ? 1 : -1;
+        const h = p.hands[side];
+        const j = reach(nx + px * b.shoulder * s, ny + py * b.shoulder * s, h[0], h[1], b.arm[0], b.arm[1], h[2]);
+        el.arms[i].setAttribute("points", points(j));
+      });
+      if (key === "w") {
+        // Hair falls straight down from her head, whichever way she leans
+        setLine(el.hair, hx, hy, hx, hy + 12);
+        // The dress flares from her waist along each thigh
+        const wx = p.x + ux * 10, wy = p.y + uy * 10;
+        const hem = (j, s) => {
+          const len = Math.hypot(j[2] - j[0], j[3] - j[1]) || 1;
+          return [j[0] + (j[2] - j[0]) / len * 19 + px * 6 * s, j[1] + (j[3] - j[1]) / len * 19 + py * 6 * s];
+        };
+        const hl = hem(legs[0], -1), hr = hem(legs[1], 1);
+        el.dress.setAttribute("points", `${wx - px * 5},${wy - py * 5} ${wx + px * 5},${wy + py * 5} ${hr[0]},${hr[1]} ${hl[0]},${hl[1]}`);
+      }
+      el.group.setAttribute("transform", `translate(${p.x} 0) scale(${p.sx} 1) translate(${-p.x} 0)`);
+    };
+    const POSES = {
+      carry: {
+        m: { x: 0, y: -50, t: 0, sx: 1, hands: { l: [-9, -66, 1], r: [32, -58, 1] }, feet: { l: [-7, 0, 1], r: [7, 0, -1] } },
+        w: { x: 14, y: -62, t: -70, sx: 1, hands: { l: [6, -60, 1], r: [4, -88, -1] }, feet: { l: [36, -40, -1], r: [40, -42, -1] } }
+      },
+      stand: {
+        m: { x: -9, y: -50, t: 0, sx: 1, hands: { l: [-19, -56, 1], r: [4, -60, -1] }, feet: { l: [-14, 0, 1], r: [-4, 0, -1] } },
+        w: { x: 14, y: -44, t: 0, sx: 1, hands: { l: [4, -60, 1], r: [24, -48, -1] }, feet: { l: [11, 0, 1], r: [17, 0, -1] } }
+      },
+      arch: {
+        m: { x: -9, y: -50, t: 2, sx: 1, hands: { l: [-26, -64, 1], r: [14, -99, -1] }, feet: { l: [-15, 0, 1], r: [-4, 0, -1] } },
+        w: { x: 14, y: -44, t: 0, sx: 1, hands: { l: [14, -99, 1], r: [25, -52, -1] }, feet: { l: [11, 0, 1], r: [17, 0, -1] } }
+      },
+      dip: {
+        m: { x: -6, y: -47, t: 16, sx: 1, hands: { l: [-28, -72, 1], r: [19, -50, -1] }, feet: { l: [-16, 0, 1], r: [2, 0, -1] } },
+        w: { x: 10, y: -42, t: 50, sx: 1, hands: { l: [12, -77, 1], r: [46, -74, -1] }, feet: { l: [22, -16, 1], r: [12, 0, -1] } }
+      }
+    };
+    const mix = (a, b, k) => typeof a === "number" ? a + (b - a) * k
+      : Array.isArray(a) ? a.map((v, i) => mix(v, b[i], k))
+      : Object.fromEntries(Object.keys(a).map(key => [key, mix(a[key], b[key], k)]));
+    // Side-to-side steps, holding hands
+    const sway = (p, P) => {
+      const s = Math.sin(p * Math.PI * 4);
+      for (const f of [P.m, P.w]) {
+        f.x += 3 * s;
+        f.t -= 3 * s;
+        f.hands.l[0] += 3 * s;
+        f.hands.r[0] += 3 * s;
+        f.feet.l[1] -= Math.max(0, -s) * 3;
+        f.feet.r[1] -= Math.max(0, s) * 3;
+      }
+    };
+    // Two turns under his raised hand
+    const twirl = (p, P) => {
+      P.w.sx = Math.cos(p * Math.PI * 4);
+      P.w.y -= Math.abs(Math.sin(p * Math.PI * 4)) * 1.5;
+    };
+    const DANCE = [
+      { dur: 1.3, from: "carry", to: "stand" },
+      { dur: 2.6, from: "stand", to: "stand", move: sway },
+      { dur: 0.7, from: "stand", to: "arch" },
+      { dur: 1.8, from: "arch", to: "arch", move: twirl },
+      { dur: 0.7, from: "arch", to: "stand" },
+      { dur: 1.1, from: "stand", to: "dip" },
+      { dur: 0.9, from: "dip", to: "dip" },
+      { dur: 1.5, from: "dip", to: "carry" }
+    ];
+    const ease = x => x * x * (3 - 2 * x);
+    let danceStart = 0;
+    const updateCouple = now => {
+      let P = null;
+      if (danceStart) {
+        let t = (now - danceStart) / 1000;
+        for (const step of DANCE) {
+          if (t < step.dur) {
+            const p = t / step.dur;
+            P = mix(POSES[step.from], POSES[step.to], ease(p));
+            if (step.move) step.move(p, P);
+            break;
+          }
+          t -= step.dur;
+        }
+        if (!P) {
+          danceStart = 0;
+          coupleHearts();
+        }
+      }
+      if (!P) {
+        // Resting in his arms: slow breathing, her feet swaying a little
+        P = mix(POSES.carry, POSES.carry, 0);
+        const breathe = Math.sin(now / 900) * 0.5;
+        P.m.y += breathe;
+        P.w.y += breathe;
+        P.m.hands.l[1] += breathe;
+        P.m.hands.r[1] += breathe;
+        P.w.hands.l[1] += breathe;
+        P.w.hands.r[1] += breathe;
+        const swing = Math.sin(now / 1300) * 1.5;
+        P.w.feet.l[0] += swing;
+        P.w.feet.r[0] += swing * 0.8;
+      }
+      placeFigure("m", P.m);
+      placeFigure("w", P.w);
+    };
+    // A few little hearts float up when he has her in his arms again
+    const coupleHearts = () => {
+      for (let i = 0; i < 3; i++) {
+        const h = document.createElement("span");
+        h.className = "couple-heart";
+        h.textContent = "♥";
+        h.style.left = `${couple.offsetLeft + couple.offsetWidth * (0.35 + Math.random() * 0.3)}px`;
+        h.style.top = `${couple.offsetTop}px`;
+        h.style.animationDelay = `${i * 0.25}s`;
+        h.addEventListener("animationend", () => h.remove());
+        diveCard.appendChild(h);
+      }
+    };
+    const startDance = () => {
+      if (danceStart) return;
+      danceStart = performance.now();
+      withAudio(level => [659.25, 783.99, 987.77].forEach((f, i) => tone(f, i * 0.12, 1, 0.05 * level)));
+    };
+    couple.addEventListener("click", startDance);
+    couple.addEventListener("keydown", e => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        startDance();
+      }
+    });
+    updateCouple(performance.now());
+
     let seenMs = 0, seenLast = performance.now();
     const diveTimer = setInterval(() => {
       const now = performance.now();
