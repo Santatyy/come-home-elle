@@ -1033,7 +1033,7 @@
       transform-style: preserve-3d;
     }
     .letter-cover {
-      z-index: 4;
+      z-index: 5;
       transition: transform 1.3s cubic-bezier(0.6, 0.05, 0.3, 1);
     }
     .letter:not(.open):hover .letter-cover,
@@ -1049,28 +1049,35 @@
       transition: transform var(--turn), z-index 0s linear 1.2s;
     }
     .leaf1 {
-      z-index: 3;
+      z-index: 4;
     }
     .leaf2 {
-      z-index: 2;
+      z-index: 3;
     }
     .leaf3 {
+      z-index: 2;
+    }
+    .leaf4 {
       z-index: 1;
     }
-    .letter:is([data-page="2"], [data-page="3"], [data-page="4"]) .leaf1,
-    .letter:is([data-page="3"], [data-page="4"]) .leaf2,
-    .letter[data-page="4"] .leaf3 {
+    .letter:is([data-page="2"], [data-page="3"], [data-page="4"], [data-page="5"]) .leaf1,
+    .letter:is([data-page="3"], [data-page="4"], [data-page="5"]) .leaf2,
+    .letter:is([data-page="4"], [data-page="5"]) .leaf3,
+    .letter[data-page="5"] .leaf4 {
       transform: rotateY(-180deg);
       transition: transform var(--turn), z-index 0s;
     }
-    .letter:is([data-page="2"], [data-page="3"], [data-page="4"]) .leaf1 {
-      z-index: 5;
-    }
-    .letter:is([data-page="3"], [data-page="4"]) .leaf2 {
+    .letter:is([data-page="2"], [data-page="3"], [data-page="4"], [data-page="5"]) .leaf1 {
       z-index: 6;
     }
-    .letter[data-page="4"] .leaf3 {
+    .letter:is([data-page="3"], [data-page="4"], [data-page="5"]) .leaf2 {
       z-index: 7;
+    }
+    .letter:is([data-page="4"], [data-page="5"]) .leaf3 {
+      z-index: 8;
+    }
+    .letter[data-page="5"] .leaf4 {
+      z-index: 9;
     }
     .letter-face {
       position: absolute;
@@ -1275,24 +1282,30 @@
       transform: translateY(10px);
       transition-delay: 0s;
     }
-    .letter:is([data-page="2"], [data-page="3"], [data-page="4"]) .on2 p,
-    .letter:is([data-page="3"], [data-page="4"]) .on3 p,
-    .letter[data-page="4"] .on4 p {
+    .letter:is([data-page="2"], [data-page="3"], [data-page="4"], [data-page="5"]) .on2 p,
+    .letter:is([data-page="3"], [data-page="4"], [data-page="5"]) .on3 p,
+    .letter:is([data-page="4"], [data-page="5"]) .on4 p,
+    .letter[data-page="5"] .on5 p {
       opacity: 1;
       transform: none;
     }
     .letter[data-page="2"] .on2 p:nth-child(1),
     .letter[data-page="3"] .on3 p:nth-child(1),
-    .letter[data-page="4"] .on4 p:nth-child(1) {
+    .letter[data-page="4"] .on4 p:nth-child(1),
+    .letter[data-page="5"] .on5 p:nth-child(1) {
       transition-delay: 1s;
     }
     .letter[data-page="2"] .on2 p:nth-child(2),
     .letter[data-page="3"] .on3 p:nth-child(2),
-    .letter[data-page="4"] .on4 p:nth-child(2) {
+    .letter[data-page="4"] .on4 p:nth-child(2),
+    .letter[data-page="5"] .on5 p:nth-child(2) {
       transition-delay: 1.8s;
     }
     .letter[data-page="2"] .on2 p:nth-child(3) {
       transition-delay: 2.4s;
+    }
+    .letter[data-page="4"] .on4 p:nth-child(3) {
+      transition-delay: 2.7s;
     }
     .letter-thanks {
       color: #f1e4c0;
@@ -1361,6 +1374,24 @@
       letter-spacing: 0.08em;
       text-shadow: 0 0 18px rgba(240, 220, 170, 0.45);
     }
+    .letter-msg .letter-genius {
+      margin-top: 8%;
+      color: #f6ead0;
+      font: 700 calc(var(--lw) * 0.068)/1.35 "Glacial Indifference", "Segoe UI", sans-serif;
+      letter-spacing: 0.05em;
+      text-shadow: 0 0 16px rgba(255, 190, 225, 0.5);
+      text-wrap: balance;
+    }
+    /* Left page of the fourth spread: a ringed planet slowly rocking */
+    .ringed-planet {
+      position: absolute;
+      top: 22%;
+      left: 50%;
+      width: 62%;
+      overflow: visible;
+      filter: drop-shadow(0 0 14px rgba(220, 200, 255, 0.35));
+      animation: planet-rock 9s ease-in-out infinite alternate;
+    }
     /* Left page of the last spread: a full moon with a slowly breathing halo */
     .full-moon {
       position: absolute;
@@ -1428,7 +1459,8 @@
     .letter[data-page="1"] .letter-turn[data-from="1"],
     .letter[data-page="2"] .letter-turn[data-from="2"],
     .letter[data-page="3"] .letter-turn[data-from="3"],
-    .letter[data-page="4"] .letter-turn[data-from="4"] {
+    .letter[data-page="4"] .letter-turn[data-from="4"],
+    .letter[data-page="5"] .letter-turn[data-from="5"] {
       pointer-events: auto;
     }
     /* "close" sends the card off, and the night series photos slide in */
@@ -1472,9 +1504,10 @@
         transform: rotateX(14deg);
       }
       .letter.open .letter-cover,
-      .letter:is([data-page="2"], [data-page="3"], [data-page="4"]) .leaf1,
-      .letter:is([data-page="3"], [data-page="4"]) .leaf2,
-      .letter[data-page="4"] .leaf3 {
+      .letter:is([data-page="2"], [data-page="3"], [data-page="4"], [data-page="5"]) .leaf1,
+      .letter:is([data-page="3"], [data-page="4"], [data-page="5"]) .leaf2,
+      .letter:is([data-page="4"], [data-page="5"]) .leaf3,
+      .letter[data-page="5"] .leaf4 {
         transform: rotateX(180deg);
       }
       .letter-face.flip {
@@ -1521,6 +1554,10 @@
     }
     @keyframes letter-out {
       to { opacity: 0; transform: translateY(-30px) scale(0.85); filter: blur(4px); }
+    }
+    @keyframes planet-rock {
+      from { transform: translateX(-50%) rotate(-5deg); }
+      to { transform: translateX(-50%) rotate(5deg); }
     }
     @keyframes twin-orbit {
       to { transform: rotate(360deg); }
@@ -1709,11 +1746,29 @@
             <div class="letter-face right night-page">
               <span class="letter-spark" style="top: 12%; left: 16%; font-size: 12px; animation-delay: -1.2s" aria-hidden="true">✦</span>
               <span class="letter-spark" style="bottom: 18%; right: 14%; font-size: 10px; animation-delay: -0.4s" aria-hidden="true">✦</span>
-              <div class="letter-msg later on4">
+              <div class="letter-msg later on5">
                 <p class="letter-love">I love you.</p>
                 <p class="letter-mark">♡</p>
               </div>
-              <button class="letter-turn close" id="letter-close" type="button" data-from="4">close ×</button>
+              <button class="letter-turn close" id="letter-close" type="button" data-from="5">close ×</button>
+            </div>
+            <!-- Fourth message page -->
+            <div class="letter-leaf leaf4">
+              <div class="letter-face right night-page">
+                <span class="letter-spark" style="top: 10%; left: 13%; font-size: 11px; animation-delay: -1.4s" aria-hidden="true">✦</span>
+                <span class="letter-spark" style="top: 14%; right: 16%; font-size: 9px; animation-delay: -2.6s" aria-hidden="true">✦</span>
+                <span class="letter-spark" style="bottom: 13%; right: 12%; font-size: 12px; animation-delay: -0.5s" aria-hidden="true">✦</span>
+                <div class="letter-msg later on4">
+                  <p class="letter-slow">Elle, you are creative and a very smart person. You are truly fascinating.</p>
+                  <p class="letter-soft">Never let anybody's words make you waver, okay?</p>
+                  <p class="letter-genius">My genius pretty baby.</p>
+                </div>
+                <button class="letter-turn next" type="button" data-from="4" data-go="5">next page ›</button>
+              </div>
+              <div class="letter-face left flip night-page">
+                <span class="full-moon" aria-hidden="true"></span>
+                <button class="letter-turn prev" type="button" data-from="5" data-go="4">‹ previous page</button>
+              </div>
             </div>
             <!-- Third message page -->
             <div class="letter-leaf leaf3">
@@ -1728,7 +1783,21 @@
                 <button class="letter-turn next" type="button" data-from="3" data-go="4">next page ›</button>
               </div>
               <div class="letter-face left flip night-page">
-                <span class="full-moon" aria-hidden="true"></span>
+                <svg class="ringed-planet" viewBox="-50 -30 100 60" aria-hidden="true">
+                  <defs>
+                    <radialGradient id="planet-tone" cx="0.36" cy="0.32" r="0.75">
+                      <stop offset="0" stop-color="#fff4dc"/>
+                      <stop offset="0.55" stop-color="#e3b9cf"/>
+                      <stop offset="1" stop-color="#6f5fae"/>
+                    </radialGradient>
+                  </defs>
+                  <g transform="rotate(-16)">
+                    <path d="M-44 0 A44 10 0 0 1 44 0" fill="none" stroke="rgba(240, 225, 185, 0.45)" stroke-width="2"/>
+                    <circle r="19" fill="url(#planet-tone)"/>
+                    <path d="M-44 0 A44 10 0 0 0 44 0" fill="none" stroke="rgba(246, 234, 208, 0.85)" stroke-width="2"/>
+                  </g>
+                  <circle cx="38" cy="-22" r="1.6" fill="#fbf4e2"/>
+                </svg>
                 <button class="letter-turn prev" type="button" data-from="4" data-go="3">‹ previous page</button>
               </div>
             </div>
