@@ -805,10 +805,8 @@
       width: 100%;
       height: 100%;
     }
-    /* Over everything in the night, the card included, so the firework is
-       seen whatever is open */
+    /* Just over the star trails: behind the hills, the card and the photos */
     .firework-sky {
-      z-index: 6;
       pointer-events: none;
       mix-blend-mode: screen;
     }
@@ -1702,6 +1700,7 @@
   <div class="dive" id="dive" role="dialog" aria-modal="true" aria-labelledby="dive-title" hidden>
     <div class="dive-card" id="dive-card">
       <canvas class="sky" id="dive-sky" aria-hidden="true"></canvas>
+      <canvas class="sky firework-sky" id="firework-sky" aria-hidden="true"></canvas>
       <svg class="sky-hills" viewBox="0 280 500 120" preserveAspectRatio="none" aria-hidden="true">
         <path fill="#16295e" opacity="0.85" d="M0 330 Q55 312 105 326 T215 306 T330 296 T425 314 T500 300 V400 H0Z"/>
         <path fill="#0b1638" d="M0 346 Q60 334 112 342 T230 336 T350 344 T500 334 V400 H0Z"/>
@@ -1888,7 +1887,6 @@
           </div>
         </div>
       </div>
-      <canvas class="sky firework-sky" id="firework-sky" aria-hidden="true"></canvas>
     </div>
   </div>
   <script>
@@ -2869,7 +2867,8 @@
     };
 
     // One firework, only on the first "I'm in a field of dandelions": a
-    // rocket goes up from the hill and bursts right as she sings "I'm",
+    // rocket goes up from behind the hills in the middle and bursts above
+    // the night photos right as she sings "I'm",
     // into a ball of pink and gold sparks with a heart in the middle
     const fireSky = document.getElementById("firework-sky");
     const fireCtx = fireSky.getContext("2d");
@@ -2877,21 +2876,18 @@
     const RISE = 1.5; // seconds from the ground up to the burst
     const SPARK_COLORS = ["255,150,205", "255,190,225", "255,214,140", "255,236,190", "205,180,255"];
     let firework = null, fireworkDone = false, fireLast = 0;
-    // Where the front hill's top is at a share x of the width, on the canvas
-    const hillTop = (x, dpr) => {
-      const hills = diveCard.querySelector(".sky-hills");
-      const path = hills.querySelector("path:last-child");
-      const len = path.getTotalLength();
-      let best = null;
-      for (let d = 0; d <= len; d += len / 400) {
-        const p = path.getPointAtLength(d);
-        if (p.y < 399 && (!best || Math.abs(p.x - x * 500) < Math.abs(best.x - x * 500))) best = p;
-      }
-      const h = hills.getBoundingClientRect(), c = diveCard.getBoundingClientRect();
-      return [(h.left - c.left + best.x / 500 * h.width) * dpr, (h.top - c.top + (best.y - 280) / 120 * h.height) * dpr];
+    // How high up the sliding night photos reach, or will once the card is
+    // closed: their row sits in the middle of the space above the hills
+    const photosTop = () => {
+      const c = diveCard.getBoundingClientRect();
+      const row = document.querySelector("#night-gallery:not([hidden]) .row");
+      if (row) return row.getBoundingClientRect().top - c.top;
+      const hills = diveCard.querySelector(".sky-hills").getBoundingClientRect().height;
+      const rowH = Math.min(Math.max(140, window.innerWidth * 0.22), 260) + 20;
+      return (c.height - hills * 0.6 - rowH) / 2;
     };
     const burstFirework = (f, W, H) => {
-      const reach = Math.min(W, H) * 0.24; // how far the sparks spread
+      const reach = f.reach; // how far the sparks spread
       const DRAG = 2.2;
       const add = (vx, vy, color, size, life, fall) => f.sparks.push({
         x: f.x1, y: f.y1, vx, vy, color, size, life, fall, drag: DRAG, trail: []
@@ -2942,9 +2938,11 @@
       }
       const f = firework;
       if (f.x0 === undefined) {
-        [f.x0, f.y0] = hillTop(W > H ? 0.74 : 0.62, dpr);
-        f.x1 = f.x0 - W * 0.03;
-        f.y1 = H * 0.28;
+        const top = photosTop() * dpr;
+        f.reach = Math.max(Math.min(Math.min(W, H) * 0.24, top * 0.46), Math.min(W, H) * 0.12);
+        f.x0 = f.x1 = W / 2;
+        f.y0 = H;
+        f.y1 = Math.max(f.reach + 8 * dpr, top - f.reach - 16 * dpr);
       }
       const dt = Math.min((now - (fireLast || now)) / 1000, 0.05);
       fireLast = now;
