@@ -2886,6 +2886,7 @@
       const rowH = Math.min(Math.max(140, window.innerWidth * 0.22), 260) + 20;
       return (c.height - hills * 0.6 - rowH) / 2;
     };
+    const HEART = 0.5; // the heart's size against the ring's
     const burstFirework = (f, W, H) => {
       const reach = f.reach; // how far the sparks spread
       const DRAG = 2.2;
@@ -2908,7 +2909,7 @@
       for (let i = 1; i < curve.length; i++) {
         along.push(along[i - 1] + Math.hypot(curve[i][0] - curve[i - 1][0], curve[i][1] - curve[i - 1][1]));
       }
-      const v = reach * DRAG * 0.55 / 17;
+      const v = reach * DRAG * HEART / 17;
       for (let k = 0, j = 1; k < 64; k++) {
         const d = (k / 64) * along[along.length - 1];
         while (along[j] < d) j++;
@@ -2939,10 +2940,12 @@
       const f = firework;
       if (f.x0 === undefined) {
         const top = photosTop() * dpr;
-        f.reach = Math.max(Math.min(Math.min(W, H) * 0.24, top * 0.46), Math.min(W, H) * 0.12);
+        // The ring stays on screen and may go down behind the photos; the
+        // heart (its tip HEART × reach below the middle) stays above them
+        f.reach = Math.max(Math.min(Math.min(W, H) * 0.32, (top - 8 * dpr) / (1 + HEART)), Math.min(W, H) * 0.12);
         f.x0 = f.x1 = W / 2;
         f.y0 = H;
-        f.y1 = Math.max(f.reach + 8 * dpr, top - f.reach - 16 * dpr);
+        f.y1 = Math.max(f.reach + 4 * dpr, top - 8 * dpr - f.reach * HEART);
       }
       const dt = Math.min((now - (fireLast || now)) / 1000, 0.05);
       fireLast = now;
