@@ -1028,49 +1028,56 @@
       visibility: visible;
       transform: translate(calc(-50% + var(--nudge, 0px)), 0);
     }
-    /* Elle in a heart frame, coming up beside the note once the code is
-       tapped; the photo is zoomed in on her face */
+    /* The whole photo of Elle, coming up beside the note once the code is
+       tapped, with a thin heart drawing itself round her face */
     .gift-photo {
-      --ph: clamp(84px, 8vw, 116px);
+      --ph: clamp(96px, 9vw, 140px);
       position: absolute;
       top: 50%;
       right: calc(100% + 12px);
       width: var(--ph);
-      height: calc(var(--ph) * 0.9175);
-      margin-top: calc(var(--ph) * -0.459);
-      filter: drop-shadow(0 0 14px rgba(255, 150, 205, 0.6)) drop-shadow(0 8px 16px rgba(4, 8, 30, 0.45));
+      aspect-ratio: 825 / 1024;
+      margin-top: calc(var(--ph) * -0.62 - 3px);
+      overflow: hidden;
+      border: 3px solid #fbf4e2;
+      border-radius: 10px;
+      background: #fbf4e2;
+      box-shadow: 0 0 18px rgba(255, 150, 205, 0.55), 0 8px 18px rgba(4, 8, 30, 0.45);
       opacity: 0;
       pointer-events: none;
-      transform: scale(0.3) rotate(-12deg);
+      transform: scale(0.3) rotate(-10deg);
       transform-origin: 100% 50%;
       transition: opacity 0.4s ease, transform 0.7s cubic-bezier(0.2, 0.9, 0.3, 1.35);
-    }
-    .gift-photo::before,
-    .gift-face {
-      position: absolute;
-      -webkit-mask: var(--heart) center / 100% 100% no-repeat;
-      mask: var(--heart) center / 100% 100% no-repeat;
-    }
-    .gift-photo::before {
-      content: "";
-      inset: 0;
-      background: linear-gradient(135deg, #ffe6f2 0%, #ff9fcb 45%, #ffd98c 100%);
-    }
-    .gift-face {
-      top: 8%;
-      left: 8%;
-      width: 84%;
-      height: 84%;
-      background: url("night%20series/elleyankee.png") 65% 34% / 187.5% auto no-repeat;
     }
     .night-gift.photo .gift-photo {
       opacity: 1;
       transform: none;
-      animation: gift-photo-beat 2.4s ease-in-out 0.8s infinite;
     }
-    @keyframes gift-photo-beat {
-      0%, 100% { transform: none; }
-      50% { transform: scale(1.05); }
+    .gift-photo img,
+    .gift-photo svg {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+    }
+    .gift-photo img {
+      object-fit: cover;
+    }
+    .gift-photo svg {
+      overflow: visible;
+      filter: drop-shadow(0 0 3px rgba(255, 170, 215, 0.95));
+    }
+    .gift-heart-line {
+      fill: none;
+      stroke: #ffe3f1;
+      stroke-width: 0.42;
+      stroke-linecap: round;
+      stroke-dasharray: 1;
+      stroke-dashoffset: 1;
+      transition: stroke-dashoffset 1.4s ease-in-out 0.6s;
+    }
+    .night-gift.photo .gift-heart-line {
+      stroke-dashoffset: 0;
     }
     .gift-code {
       display: block;
@@ -1943,7 +1950,15 @@
         <button class="gift-note" id="gift-note" type="button" aria-label="Copy the code">
           <span class="gift-code" id="gift-code">RIWWUHTX7LZ198HYWA</span>
           <span class="gift-copied" id="gift-copied" aria-live="polite">tap to copy</span>
-          <span class="gift-photo" id="gift-photo" aria-hidden="true"><span class="gift-face"></span></span>
+          <span class="gift-photo" id="gift-photo" aria-hidden="true">
+            <img src="night%20series/elleyankee.png" alt="" loading="lazy">
+            <!-- In the photo's own pixels (825 × 1024), round her face -->
+            <svg viewBox="0 0 825 1024" preserveAspectRatio="none">
+              <g transform="translate(250 206) scale(22) translate(-2 -3)">
+                <path class="gift-heart-line" pathLength="1" d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+              </g>
+            </svg>
+          </span>
         </button>
         <button class="gift-box" id="gift-box" type="button" aria-label="Open the present">
           <svg viewBox="0 0 40 40" aria-hidden="true">
