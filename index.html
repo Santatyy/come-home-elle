@@ -3175,7 +3175,7 @@
       if (f.line === undefined) {
         f.line = frontHillLine(dpr);
         const hills = document.getElementById("front-hill").getBoundingClientRect().height * dpr;
-        f.L = Math.min(Math.max(52 * dpr, Math.min(W, H) * 0.1), 120 * dpr);
+        f.L = Math.min(Math.max(44 * dpr, Math.min(W, H) * 0.085), 102 * dpr);
         // From near the right edge over towards the middle, clear of the card
         const span = Math.max(W * 0.15, f.L * 2.6);
         const mid = Math.min(W * 0.86, W - 8 * dpr - f.L * 0.5 - span / 2);
