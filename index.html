@@ -916,8 +916,8 @@
       height: 100%;
       overflow: visible;
     }
-    /* A wrapped present that drops onto the front hill 15 s into the night;
-       a tap pops its lid off and a note with the code comes up out of it */
+    /* A wrapped present that drops onto the front hill as the firework goes
+       up; a tap pops its lid off and a note with the code comes up out of it */
     .night-gift {
       --gift: clamp(36px, calc(var(--hills) * 0.16), 56px);
       position: absolute;
@@ -3107,10 +3107,13 @@
       // Send it up when the song is RISE seconds before "I'm" the first time
       if (!fireworkDone && nightSongOn && !nightSong.paused) {
         const lead = BURST_AT - nightSong.currentTime;
-        if (lead < 0.3) fireworkDone = true; // too late to make it in time
-        else if (lead <= RISE) {
+        if (lead < 0.3) {
+          fireworkDone = true; // too late to make it in time
+          dropGift();
+        } else if (lead <= RISE) {
           fireworkDone = true;
           firework = { launch: now, burst: now + lead * 1000, sparks: null, embers: [] };
+          dropGift(); // the present falls as the rocket goes up
         }
       }
       if (!firework) return;
@@ -3438,7 +3441,7 @@
     const giftNote = document.getElementById("gift-note");
     const giftCode = document.getElementById("gift-code");
     const giftCopied = document.getElementById("gift-copied");
-    const GIFT_AT = 15000; // ms after the night fills the screen
+    const dropGift = () => { gift.hidden = false; };
     giftBox.addEventListener("click", () => {
       if (gift.classList.contains("open")) return;
       // Slide the note over if it would stick out past the edge of the screen
@@ -3497,7 +3500,9 @@
         diveContent.hidden = true;
         nightHasCome = true;
         nightCameAt = performance.now();
-        setTimeout(() => { gift.hidden = false; }, GIFT_AT);
+        // Without Dandelions there is no firework, so the present comes when
+        // the rocket would have gone up
+        setTimeout(() => { if (!nightSongOn) dropGift(); }, (BURST_AT - RISE - NIGHT_SONG_START) * 1000);
         startNightSong();
       }, 1050);
       setTimeout(() => {
