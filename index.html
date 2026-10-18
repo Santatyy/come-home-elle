@@ -810,6 +810,11 @@
       pointer-events: none;
       mix-blend-mode: screen;
     }
+    /* Between the back hills and the front one, so the betta comes out of
+       the ground and goes back into it */
+    .fish-sky {
+      pointer-events: none;
+    }
     .sky-hills {
       position: absolute;
       left: 0;
@@ -1704,6 +1709,9 @@
       <svg class="sky-hills" viewBox="0 280 500 120" preserveAspectRatio="none" aria-hidden="true">
         <path fill="#16295e" opacity="0.85" d="M0 330 Q55 312 105 326 T215 306 T330 296 T425 314 T500 300 V400 H0Z"/>
         <path fill="#0b1638" d="M0 346 Q60 334 112 342 T230 336 T350 344 T500 334 V400 H0Z"/>
+      </svg>
+      <canvas class="sky fish-sky" id="fish-sky" aria-hidden="true"></canvas>
+      <svg class="sky-hills" id="front-hill" viewBox="0 280 500 120" preserveAspectRatio="none" aria-hidden="true">
         <path fill="#030714" d="M0 356 Q35 341 72 340 Q108 340 140 356 Q190 378 255 372 Q330 366 385 378 Q445 390 500 382 V400 H0Z"/>
       </svg>
       <div class="night-couple" id="couple" role="button" tabindex="0" aria-label="Make them dance">
@@ -2576,6 +2584,7 @@
       for (const s of trails) s.a -= spin * dt; // counter-clockwise
       paintSky(now, warp, grown);
       paintFirework(now);
+      paintFish(now);
       updateCouple(now);
       skyRaf = requestAnimationFrame(drawSkies);
     };
@@ -3033,6 +3042,220 @@
       ctx.globalCompositeOperation = "source-over";
     };
 
+    // Ten seconds into the night a betta leaps out of the front hill on the
+    // right, arcs over like an upside-down U and dives back in, with a puff
+    // of sparkles where it breaks out and where it goes back in. Its canvas
+    // lies between the hills, so the front hill hides it while it is under
+    const fishSky = document.getElementById("fish-sky");
+    const fishCtx = fishSky.getContext("2d");
+    const FISH_AT = 10000; // ms after the night fills the screen
+    const LEAP = 1.9; // seconds from going up to diving back in
+    let nightCameAt = 0, fish = null, fishDone = false, fishLast = 0;
+    // The front hill's top, on the canvas, as points from left to right
+    const frontHillLine = dpr => {
+      const svg = document.getElementById("front-hill");
+      const path = svg.querySelector("path");
+      const h = svg.getBoundingClientRect(), c = diveCard.getBoundingClientRect();
+      const len = path.getTotalLength(), line = [];
+      for (let d = 0; d <= len; d += len / 600) {
+        const p = path.getPointAtLength(d);
+        if (p.x > 0 && p.x < 500 && p.y < 399) {
+          line.push([(h.left - c.left + p.x / 500 * h.width) * dpr, (h.top - c.top + (p.y - 280) / 120 * h.height) * dpr]);
+        }
+      }
+      return line;
+    };
+    const groundAt = (line, x) => {
+      const i = line.findIndex(p => p[0] >= x);
+      if (i < 0) return line[line.length - 1][1];
+      if (i === 0) return line[0][1];
+      const [ax, ay] = line[i - 1], [bx, by] = line[i];
+      return ay + (by - ay) * (x - ax) / (bx - ax || 1);
+    };
+    // The betta faces +x and is one unit long, from its nose (x = 0.5) to the
+    // end of its tail; `wave` sets how far along its fins are rippling
+    const drawBetta = (ctx, wave) => {
+      const w = k => Math.sin(wave + k) * 0.025;
+      const finTone = ctx.createRadialGradient(-0.05, 0, 0, -0.05, 0, 0.42);
+      finTone.addColorStop(0.2, "rgba(255,95,170,0.92)");
+      finTone.addColorStop(0.6, "rgba(232,125,228,0.62)");
+      finTone.addColorStop(1, "rgba(185,165,255,0.28)");
+      // Tail: a wide half-moon fan with a scalloped, rippling edge
+      const edge = [];
+      for (let i = 0; i <= 8; i++) {
+        const a = Math.PI + (i / 8 - 0.5) * 2.5, r = 0.37 + w(i * 1.1);
+        edge.push({ a, r, x: -0.12 + Math.cos(a) * r, y: Math.sin(a) * r });
+      }
+      ctx.fillStyle = finTone;
+      ctx.beginPath();
+      ctx.moveTo(-0.12, 0.035);
+      ctx.quadraticCurveTo(-0.16, 0.2, edge[0].x, edge[0].y);
+      for (let i = 1; i < edge.length; i++) {
+        const a = (edge[i - 1].a + edge[i].a) / 2, r = (edge[i - 1].r + edge[i].r) / 2 + 0.04;
+        ctx.quadraticCurveTo(-0.12 + Math.cos(a) * r, Math.sin(a) * r, edge[i].x, edge[i].y);
+      }
+      ctx.quadraticCurveTo(-0.16, -0.2, -0.12, -0.035);
+      ctx.fill();
+      ctx.strokeStyle = "rgba(255,225,245,0.35)";
+      ctx.lineWidth = 0.006;
+      ctx.beginPath();
+      for (const p of edge) {
+        ctx.moveTo(-0.12, 0);
+        ctx.lineTo(p.x, p.y);
+      }
+      ctx.stroke();
+      // Long flowing fins along the back, underneath, and two thin streamers
+      ctx.beginPath();
+      ctx.moveTo(0.17, -0.1);
+      ctx.quadraticCurveTo(0.1, -0.25 + w(2), -0.06, -0.27 + w(2.6));
+      ctx.quadraticCurveTo(-0.2, -0.27 + w(3.2), -0.25, -0.17 + w(3.8));
+      ctx.quadraticCurveTo(-0.17, -0.08, -0.12, -0.035);
+      ctx.quadraticCurveTo(0.02, -0.11, 0.17, -0.1);
+      ctx.moveTo(0.24, 0.095);
+      ctx.quadraticCurveTo(0.14, 0.3 + w(4), -0.05, 0.33 + w(4.6));
+      ctx.quadraticCurveTo(-0.21, 0.32 + w(5.2), -0.27, 0.2 + w(5.8));
+      ctx.quadraticCurveTo(-0.18, 0.08, -0.12, 0.035);
+      ctx.quadraticCurveTo(0.04, 0.105, 0.24, 0.095);
+      ctx.moveTo(0.33, 0.085);
+      ctx.quadraticCurveTo(0.31, 0.2, 0.2 + w(1), 0.29);
+      ctx.quadraticCurveTo(0.27, 0.19, 0.29, 0.09);
+      ctx.fill();
+      // Body: blue at the head turning violet, then pink into the tail
+      const skin = ctx.createLinearGradient(0.5, 0, -0.13, 0);
+      skin.addColorStop(0, "#7d8dff");
+      skin.addColorStop(0.45, "#b25cf0");
+      skin.addColorStop(1, "#ff4f9e");
+      ctx.fillStyle = skin;
+      ctx.beginPath();
+      ctx.moveTo(0.5, 0.005);
+      ctx.bezierCurveTo(0.47, -0.06, 0.36, -0.1, 0.2, -0.105);
+      ctx.bezierCurveTo(0.05, -0.105, -0.06, -0.075, -0.13, -0.035);
+      ctx.lineTo(-0.13, 0.035);
+      ctx.bezierCurveTo(-0.06, 0.075, 0.05, 0.1, 0.2, 0.1);
+      ctx.bezierCurveTo(0.36, 0.095, 0.46, 0.06, 0.5, 0.005);
+      ctx.fill();
+      const sheen = ctx.createLinearGradient(0, -0.1, 0, 0.05);
+      sheen.addColorStop(0, "rgba(255,255,255,0.45)");
+      sheen.addColorStop(1, "rgba(255,255,255,0)");
+      ctx.fillStyle = sheen;
+      ctx.fill();
+      ctx.strokeStyle = "rgba(255,255,255,0.3)";
+      ctx.lineWidth = 0.01;
+      ctx.beginPath();
+      ctx.moveTo(0.34, -0.07);
+      ctx.quadraticCurveTo(0.3, 0, 0.34, 0.07);
+      ctx.stroke();
+      ctx.fillStyle = "rgba(255,210,240,0.45)";
+      ctx.beginPath();
+      ctx.ellipse(0.27, 0.035, 0.07, 0.03, 0.5 + w(0) * 6, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = "#1b0d33";
+      ctx.beginPath();
+      ctx.arc(0.41, -0.022, 0.024, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = "#fff";
+      ctx.beginPath();
+      ctx.arc(0.418, -0.03, 0.009, 0, Math.PI * 2);
+      ctx.fill();
+    };
+    const paintFish = now => {
+      if (!fishDone && nightCameAt && now - nightCameAt >= FISH_AT) {
+        fishDone = true;
+        fish = { start: now, sparks: [], out: false, in: false };
+      }
+      if (!fish) return;
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      const W = Math.round(fishSky.clientWidth * dpr), H = Math.round(fishSky.clientHeight * dpr);
+      if (!W || !H) return;
+      if (fishSky.width !== W || fishSky.height !== H) {
+        fishSky.width = W;
+        fishSky.height = H;
+      }
+      const f = fish;
+      if (f.line === undefined) {
+        f.line = frontHillLine(dpr);
+        const hills = document.getElementById("front-hill").getBoundingClientRect().height * dpr;
+        f.L = Math.min(Math.max(52 * dpr, Math.min(W, H) * 0.1), 120 * dpr);
+        // From near the right edge over towards the middle, clear of the card
+        const span = Math.max(W * 0.15, f.L * 2.6);
+        const mid = Math.min(W * 0.86, W - 8 * dpr - f.L * 0.5 - span / 2);
+        f.x0 = mid + span / 2;
+        f.x1 = mid - span / 2;
+        f.g0 = groundAt(f.line, f.x0);
+        f.g1 = groundAt(f.line, f.x1);
+        f.height = Math.min(Math.max(hills * 0.9, f.L * 2.6), H * 0.3);
+        f.depth = f.L * 0.7; // starts and ends this far under the ground
+      }
+      const dt = Math.min((now - (fishLast || now)) / 1000, 0.05);
+      fishLast = now;
+      const ctx = fishCtx;
+      ctx.clearRect(0, 0, W, H);
+      const k = Math.min((now - f.start) / 1000 / LEAP, 1);
+      const splash = (x, y, count) => {
+        for (let i = 0; i < count; i++) {
+          const a = -Math.PI / 2 + (Math.random() - 0.5) * 2.2;
+          const v = f.L * (1.2 + Math.random() * 1.8);
+          f.sparks.push({ x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v, age: 0, life: 0.7 + Math.random() * 0.5,
+            color: SPARK_COLORS[i % SPARK_COLORS.length], size: (1 + Math.random()) * dpr });
+        }
+      };
+      if (k < 1) {
+        // A thrown arc: steady across, up and back down under gravity
+        const x = f.x0 + (f.x1 - f.x0) * k;
+        const y = f.g0 + (f.g1 - f.g0) * k + f.depth - 4 * k * (1 - k) * (f.height + f.depth);
+        const dx = f.x1 - f.x0, dy = f.g1 - f.g0 - 4 * (1 - 2 * k) * (f.height + f.depth);
+        const angle = Math.atan2(dy, dx);
+        const cos = Math.cos(angle), sin = Math.sin(angle);
+        const noseX = x + cos * f.L * 0.5, noseY = y + sin * f.L * 0.5;
+        if (!f.out && noseY < groundAt(f.line, noseX)) {
+          f.out = true;
+          splash(noseX, groundAt(f.line, noseX), 18);
+        } else if (f.out && !f.in && k > 0.5 && noseY > groundAt(f.line, noseX)) {
+          f.in = true;
+          splash(noseX, groundAt(f.line, noseX), 14);
+        }
+        // Glitter dropping off its tail while it is out
+        if (f.out && !f.in && Math.random() < 0.6) {
+          f.sparks.push({ x: x - cos * f.L * 0.45, y: y - sin * f.L * 0.45, vx: (Math.random() - 0.5) * f.L * 0.6,
+            vy: (Math.random() - 0.5) * f.L * 0.6, age: 0, life: 0.5 + Math.random() * 0.4,
+            color: SPARK_COLORS[Math.floor(Math.random() * SPARK_COLORS.length)], size: (0.7 + Math.random() * 0.6) * dpr });
+        }
+        ctx.save();
+        ctx.translate(x, y);
+        ctx.rotate(angle);
+        ctx.scale(f.L, dx < 0 ? -f.L : f.L); // belly down whichever way it goes
+        ctx.shadowColor = "rgba(255,130,200,0.7)";
+        ctx.shadowBlur = f.L * 0.22;
+        drawBetta(ctx, now / 1000 * 10);
+        ctx.restore();
+      }
+      ctx.globalCompositeOperation = "lighter";
+      for (let i = f.sparks.length - 1; i >= 0; i--) {
+        const p = f.sparks[i];
+        p.age += dt;
+        if (p.age >= p.life) {
+          f.sparks.splice(i, 1);
+          continue;
+        }
+        p.vy += f.L * 5 * dt;
+        p.x += p.vx * dt;
+        p.y += p.vy * dt;
+        const alpha = (1 - p.age / p.life) * (0.6 + 0.4 * Math.random());
+        const g = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.size * 4);
+        g.addColorStop(0, `rgba(${p.color},${alpha})`);
+        g.addColorStop(1, `rgba(${p.color},0)`);
+        ctx.fillStyle = g;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.size * 4, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.globalCompositeOperation = "source-over";
+      if (k >= 1 && !f.sparks.length) {
+        ctx.clearRect(0, 0, W, H);
+        fish = null;
+      }
+    };
+
     let dived = false;
     diveYes.addEventListener("click", () => {
       if (dived) return;
@@ -3060,6 +3283,7 @@
         document.body.classList.add("night-only");
         diveContent.hidden = true;
         nightHasCome = true;
+        nightCameAt = performance.now();
         startNightSong();
       }, 1050);
       setTimeout(() => {
