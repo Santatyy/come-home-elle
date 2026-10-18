@@ -9,6 +9,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500&family=Great+Vibes&display=swap" rel="stylesheet">
   <style>
     body {
+      --heart: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='2 3 20 18.35' preserveAspectRatio='none'%3E%3Cpath d='M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z'/%3E%3C/svg%3E");
       margin: 0;
       min-height: 100vh;
       background: #ffe4ec;
@@ -101,7 +102,6 @@
       --h: calc(var(--w) * 0.9175);
       --gap: 10px;
       --gold: linear-gradient(135deg, #fbefb8 0%, #d9a93a 38%, #f6dc85 58%, #b9851a 100%);
-      --heart: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='2 3 20 18.35' preserveAspectRatio='none'%3E%3Cpath d='M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z'/%3E%3C/svg%3E");
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -1007,6 +1007,7 @@
     /* The note with the code; a tap copies the code */
     .gift-note {
       position: absolute;
+      z-index: 3; /* over the card, which may come down this far */
       left: 50%;
       bottom: calc(100% + 12px);
       padding: 10px 14px 8px;
@@ -1026,6 +1027,50 @@
       opacity: 1;
       visibility: visible;
       transform: translate(calc(-50% + var(--nudge, 0px)), 0);
+    }
+    /* Elle in a heart frame, coming up beside the note once the code is
+       tapped; the photo is zoomed in on her face */
+    .gift-photo {
+      --ph: clamp(84px, 8vw, 116px);
+      position: absolute;
+      top: 50%;
+      right: calc(100% + 12px);
+      width: var(--ph);
+      height: calc(var(--ph) * 0.9175);
+      margin-top: calc(var(--ph) * -0.459);
+      filter: drop-shadow(0 0 14px rgba(255, 150, 205, 0.6)) drop-shadow(0 8px 16px rgba(4, 8, 30, 0.45));
+      opacity: 0;
+      pointer-events: none;
+      transform: scale(0.3) rotate(-12deg);
+      transform-origin: 100% 50%;
+      transition: opacity 0.4s ease, transform 0.7s cubic-bezier(0.2, 0.9, 0.3, 1.35);
+    }
+    .gift-photo::before,
+    .gift-face {
+      position: absolute;
+      -webkit-mask: var(--heart) center / 100% 100% no-repeat;
+      mask: var(--heart) center / 100% 100% no-repeat;
+    }
+    .gift-photo::before {
+      content: "";
+      inset: 0;
+      background: linear-gradient(135deg, #ffe6f2 0%, #ff9fcb 45%, #ffd98c 100%);
+    }
+    .gift-face {
+      top: 8%;
+      left: 8%;
+      width: 84%;
+      height: 84%;
+      background: url("night%20series/elleyankee.png") 65% 34% / 187.5% auto no-repeat;
+    }
+    .night-gift.photo .gift-photo {
+      opacity: 1;
+      transform: none;
+      animation: gift-photo-beat 2.4s ease-in-out 0.8s infinite;
+    }
+    @keyframes gift-photo-beat {
+      0%, 100% { transform: none; }
+      50% { transform: scale(1.05); }
     }
     .gift-code {
       display: block;
@@ -1898,6 +1943,7 @@
         <button class="gift-note" id="gift-note" type="button" aria-label="Copy the code">
           <span class="gift-code" id="gift-code">RIWWUHTX7LZ198HYWA</span>
           <span class="gift-copied" id="gift-copied" aria-live="polite">tap to copy</span>
+          <span class="gift-photo" id="gift-photo" aria-hidden="true"><span class="gift-face"></span></span>
         </button>
         <button class="gift-box" id="gift-box" type="button" aria-label="Open the present">
           <svg viewBox="0 0 40 40" aria-hidden="true">
@@ -3444,10 +3490,12 @@
     const dropGift = () => { gift.hidden = false; };
     giftBox.addEventListener("click", () => {
       if (gift.classList.contains("open")) return;
-      // Slide the note over if it would stick out past the edge of the screen
+      // Slide the note over if it, or the photo that comes up on its left,
+      // would stick out past the edge of the screen
       const c = diveCard.getBoundingClientRect(), b = giftBox.getBoundingClientRect();
       const mid = b.left + b.width / 2 - c.left, half = giftNote.offsetWidth / 2;
-      const nudge = Math.max(12 - (mid - half), 0) + Math.min(c.width - 12 - (mid + half), 0);
+      const photo = document.getElementById("gift-photo").offsetWidth + 12;
+      const nudge = Math.max(12 - (mid - half - photo), 0) + Math.min(c.width - 12 - (mid + half), 0);
       giftNote.style.setProperty("--nudge", `${nudge}px`);
       gift.classList.add("open");
       withAudio(level => [1046.5, 1318.5, 1568, 2093, 2637].forEach((f, i) => tone(f, i * 0.08, 1.1, 0.06 * level)));
@@ -3466,6 +3514,7 @@
       return ok ? Promise.resolve() : Promise.reject(new Error("copy failed"));
     };
     giftNote.addEventListener("click", () => {
+      gift.classList.add("photo");
       copyText(giftCode.textContent).then(
         () => { giftCopied.textContent = "copied ♡"; },
         () => { giftCopied.textContent = "press and hold the code to copy"; }
