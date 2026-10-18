@@ -1006,6 +1006,7 @@
     }
     /* The note with the code; a tap copies the code */
     .gift-note {
+      --ph: clamp(96px, 9vw, 140px); /* width of Elle's photo */
       position: absolute;
       z-index: 3; /* over the card, which may come down this far */
       left: 50%;
@@ -1031,7 +1032,6 @@
     /* The whole photo of Elle, coming up beside the note once the code is
        tapped, with a thin heart drawing itself round her face */
     .gift-photo {
-      --ph: clamp(96px, 9vw, 140px);
       position: absolute;
       top: 50%;
       right: calc(100% + 12px);
@@ -1051,7 +1051,57 @@
     }
     .night-gift.photo .gift-photo {
       opacity: 1;
+      pointer-events: auto;
       transform: none;
+    }
+    /* Pann's photo, as tall as Elle's, on her left; or above her when there
+       is no room on the left (on phones) */
+    .gift-pann {
+      position: absolute;
+      top: 50%;
+      right: calc(100% + 12px + var(--ph) + 6px + 12px);
+      width: calc(var(--ph) * 2.096);
+      aspect-ratio: 971 / 575;
+      margin-top: calc(var(--ph) * -0.62 - 3px);
+      overflow: hidden;
+      border: 3px solid #fbf4e2;
+      border-radius: 10px;
+      background: #fbf4e2;
+      box-shadow: 0 0 18px rgba(255, 150, 205, 0.55), 0 8px 18px rgba(4, 8, 30, 0.45);
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transform: scale(0.6);
+      transform-origin: 100% 50%;
+      transition: opacity 0.35s ease, transform 0.5s cubic-bezier(0.2, 0.9, 0.3, 1.3), visibility 0s 0.5s;
+    }
+    .night-gift.pann-above .gift-pann {
+      top: auto;
+      bottom: calc(50% + var(--ph) * 0.62 + 3px + 10px);
+      right: auto;
+      left: calc(-12px - var(--ph) - 6px);
+      margin-top: 0;
+      transform-origin: 0 100%;
+    }
+    .night-gift.pann .gift-pann {
+      opacity: 1;
+      visibility: visible;
+      transform: none;
+      transition: opacity 0.35s ease, transform 0.5s cubic-bezier(0.2, 0.9, 0.3, 1.3), visibility 0s;
+    }
+    @media (hover: hover) {
+      .night-gift.photo .gift-photo:hover ~ .gift-pann {
+        opacity: 1;
+        visibility: visible;
+        transform: none;
+        transition: opacity 0.35s ease, transform 0.5s cubic-bezier(0.2, 0.9, 0.3, 1.3), visibility 0s;
+      }
+    }
+    .gift-pann img {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
     }
     .gift-photo img,
     .gift-photo svg {
@@ -1958,6 +2008,9 @@
                 <path class="gift-heart-line" pathLength="1" d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
               </g>
             </svg>
+          </span>
+          <span class="gift-pann" aria-hidden="true">
+            <img src="night%20series/pannheart.png" alt="" loading="lazy">
           </span>
         </button>
         <button class="gift-box" id="gift-box" type="button" aria-label="Open the present">
@@ -3528,6 +3581,23 @@
       area.remove();
       return ok ? Promise.resolve() : Promise.reject(new Error("copy failed"));
     };
+    // Pointing at Elle's photo brings up Pann's beside it; on touch screens
+    // a tap on her photo does it instead
+    const giftPhoto = document.getElementById("gift-photo");
+    const giftPann = gift.querySelector(".gift-pann");
+    const canHover = window.matchMedia("(hover: hover)");
+    const placePann = () => {
+      const c = diveCard.getBoundingClientRect(), n = giftNote.getBoundingClientRect();
+      const room = n.left - c.left - 12 - giftPhoto.offsetWidth - 12 - 12;
+      gift.classList.toggle("pann-above", room < giftPann.offsetWidth);
+    };
+    giftPhoto.addEventListener("pointerenter", placePann);
+    giftPhoto.addEventListener("click", e => {
+      e.stopPropagation(); // not another copy
+      if (canHover.matches) return;
+      placePann();
+      gift.classList.toggle("pann");
+    });
     giftNote.addEventListener("click", () => {
       gift.classList.add("photo");
       copyText(giftCode.textContent).then(
