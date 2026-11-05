@@ -1063,7 +1063,7 @@
       width: calc(var(--ph) * 2.096);
       aspect-ratio: 971 / 575;
       margin-top: calc(var(--ph) * -0.62 - 3px);
-      overflow: hidden;
+      overflow: visible; /* for what he projects out of his head */
       border: 3px solid #fbf4e2;
       border-radius: 10px;
       background: #fbf4e2;
@@ -1086,14 +1086,204 @@
     .night-gift.pann .gift-pann {
       opacity: 1;
       visibility: visible;
+      pointer-events: auto;
       transform: none;
       transition: opacity 1.1s ease, transform 1.4s cubic-bezier(0.25, 0.8, 0.3, 1.1), visibility 0s;
     }
-    .gift-pann img {
+    .gift-pann > img {
+      display: block;
+      width: 100%;
+      height: 100%;
+      border-radius: 7px;
+      object-fit: cover;
+    }
+    /* What is on Pann's mind: pointing at (or tapping) his photo projects two
+       pictures of Elle out of his head on a beam of light, and they stay.
+       Sizes are in --ph so it all scales with the photos; his head is at
+       about 65% across and 16% down his photo */
+    .gift-dream {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+    }
+    .dream-beam,
+    .dream-motes {
+      position: absolute;
+      left: calc(var(--ph) * 0.242);
+      bottom: calc(100% - var(--ph) * 0.2);
+      width: calc(var(--ph) * 2.24);
+      height: calc(var(--ph) * 0.95);
+    }
+    .dream-beam {
+      filter: blur(2.5px);
+      opacity: 0;
+      transform: scaleY(0);
+      transform-origin: 50% 100%;
+    }
+    .dream-beam::before,
+    .dream-beam::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+    }
+    .dream-beam::before {
+      clip-path: polygon(0 0, 100% 0, 53% 100%, 47% 100%);
+      background: linear-gradient(to top, rgba(255, 250, 255, 0.9), rgba(225, 235, 255, 0.55) 50%, rgba(200, 220, 255, 0.35));
+    }
+    /* A brighter core down the middle */
+    .dream-beam::after {
+      clip-path: polygon(30% 0, 70% 0, 51% 100%, 49% 100%);
+      background: linear-gradient(to top, rgba(255, 255, 255, 0.9), rgba(240, 245, 255, 0.4));
+    }
+    /* The light on his head the beam comes out of */
+    .dream-source {
+      position: absolute;
+      left: calc(var(--ph) * 1.362);
+      top: calc(var(--ph) * 0.2);
+      width: calc(var(--ph) * 0.55);
+      aspect-ratio: 1;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(255, 255, 255, 0.95), rgba(220, 232, 255, 0.55) 35%, transparent 70%);
+      opacity: 0;
+      transform: translate(-50%, -50%) scale(0);
+    }
+    .dream-motes span {
+      position: absolute;
+      left: 50%;
+      bottom: 0;
+      width: 4px;
+      height: 4px;
+      margin-left: -2px;
+      border-radius: 50%;
+      background: #fff;
+      box-shadow: 0 0 6px 2px rgba(255, 215, 240, 0.8);
+      opacity: 0;
+    }
+    .dream-shots {
+      position: absolute;
+      left: calc(var(--ph) * 0.242);
+      bottom: calc(100% + var(--ph) * 0.75);
+      display: flex;
+      gap: calc(var(--ph) * 0.14);
+      width: calc(var(--ph) * 2.24);
+    }
+    .dream-shot {
+      position: relative;
+      flex: 1;
+      aspect-ratio: 3 / 4;
+      overflow: hidden;
+      border-radius: 10px;
+      box-shadow: 0 0 26px rgba(200, 220, 255, 0.65), 0 0 6px rgba(255, 255, 255, 0.75);
+      opacity: 0;
+      transform: translateY(14px) scale(0.85) rotate(var(--r));
+    }
+    .dream-shot img {
       display: block;
       width: 100%;
       height: 100%;
       object-fit: cover;
+    }
+    /* A faint tint and fine lines, so they look projected */
+    .dream-shot::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        repeating-linear-gradient(to bottom, rgba(255, 255, 255, 0.08) 0 1px, transparent 1px 3px),
+        linear-gradient(rgba(190, 215, 255, 0.16), rgba(255, 200, 235, 0.12));
+    }
+    .night-gift.dream .dream-source {
+      animation: dream-source 0.6s ease-out forwards, dream-pulse 2.4s ease-in-out 0.6s infinite;
+    }
+    .night-gift.dream .dream-beam {
+      animation: dream-beam 0.9s cubic-bezier(0.2, 0.8, 0.3, 1) 0.3s forwards, dream-glow 3.2s ease-in-out 1.2s infinite;
+    }
+    .night-gift.dream .dream-motes span {
+      animation: dream-mote 2.4s ease-in calc(1.3s + var(--i) * 0.6s) infinite;
+    }
+    .night-gift.dream .dream-shot {
+      animation: dream-shot 1.3s ease-out 0.9s forwards, dream-flicker 6s linear 2.5s infinite;
+    }
+    .night-gift.dream .dream-shot + .dream-shot {
+      animation-delay: 1.25s, 3.4s;
+    }
+    @keyframes dream-source {
+      to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+    }
+    @keyframes dream-pulse {
+      0%, 100% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+      50% { opacity: 0.75; transform: translate(-50%, -50%) scale(0.85); }
+    }
+    @keyframes dream-beam {
+      from { opacity: 0; transform: scaleY(0); }
+      to { opacity: 1; transform: none; }
+    }
+    @keyframes dream-glow {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.7; }
+    }
+    @keyframes dream-mote {
+      0% { left: 50%; bottom: 0; opacity: 0; }
+      15% { opacity: 1; }
+      100% { left: var(--x); bottom: 100%; opacity: 0; }
+    }
+    @keyframes dream-shot {
+      0% { opacity: 0; transform: translateY(14px) scale(0.85) rotate(var(--r)); filter: brightness(2.2) blur(4px); }
+      25% { opacity: 0.7; }
+      35% { opacity: 0.3; }
+      55% { opacity: 0.9; }
+      65% { opacity: 0.6; }
+      100% { opacity: 1; transform: rotate(var(--r)); filter: none; }
+    }
+    @keyframes dream-flicker {
+      0%, 90%, 93%, 96%, 100% { opacity: 1; transform: rotate(var(--r)); }
+      91.5% { opacity: 0.82; }
+      94.5% { opacity: 0.9; }
+    }
+    /* Pann's note to Elle, coming up beside the code once it is copied, or
+       across the top of the screen when there is no room beside it */
+    .gift-msg {
+      position: absolute;
+      z-index: 3;
+      box-sizing: border-box;
+      max-width: 440px;
+      margin: 0 auto;
+      padding: 14px 18px 12px;
+      border-radius: 12px;
+      background: #fbf4e2;
+      box-shadow: 0 0 24px rgba(255, 170, 215, 0.55), 0 8px 24px rgba(4, 8, 30, 0.5);
+      color: #2a1f4a;
+      font: 400 15px/1.5 "Glacial Indifference", "Segoe UI", sans-serif;
+      opacity: 0;
+      transform: translateY(12px) scale(0.94);
+      transform-origin: 0 100%;
+      transition: opacity 0.6s ease, transform 0.8s cubic-bezier(0.2, 0.9, 0.3, 1.15);
+    }
+    .gift-msg[data-side="top"] {
+      transform: translateY(-12px) scale(0.94);
+      transform-origin: 50% 0;
+    }
+    .gift-msg.show {
+      opacity: 1;
+      transform: none;
+    }
+    .gift-msg[hidden] {
+      display: none;
+    }
+    .msg-line {
+      display: block;
+    }
+    .msg-line + .msg-line {
+      margin-top: 0.45em;
+    }
+    /* The words come up one after another */
+    .msg-word {
+      opacity: 0;
+      animation: msg-word 0.6s ease calc(0.5s + var(--i) * 0.075s) forwards;
+    }
+    @keyframes msg-word {
+      from { opacity: 0; filter: blur(3px); }
+      to { opacity: 1; filter: none; }
     }
     .gift-photo img,
     .gift-photo svg {
@@ -1990,7 +2180,7 @@
       </div>
       <div class="night-gift" id="night-gift" hidden>
         <button class="gift-note" id="gift-note" type="button" aria-label="Copy the code">
-          <span class="gift-code" id="gift-code">RIWWUHTX7LZ198HYWA</span>
+          <span class="gift-code" id="gift-code">RI01K23NZP6VWRSX18</span>
           <span class="gift-copied" id="gift-copied" aria-live="polite">tap to copy</span>
           <span class="gift-photo" id="gift-photo" aria-hidden="true">
             <img src="night%20series/elleyankee.png" alt="" loading="lazy">
@@ -2003,6 +2193,15 @@
           </span>
           <span class="gift-pann" aria-hidden="true">
             <img src="night%20series/pannheart.png" alt="" loading="lazy">
+            <span class="gift-dream">
+              <span class="dream-beam"></span>
+              <span class="dream-source"></span>
+              <span class="dream-motes"><span style="--i: 0; --x: 30%"></span><span style="--i: 1; --x: 64%"></span><span style="--i: 2; --x: 44%"></span><span style="--i: 3; --x: 74%"></span></span>
+              <span class="dream-shots">
+                <span class="dream-shot" style="--r: -4deg"><img src="night%20series/ellecosplay1.jpg" alt="" loading="lazy"></span>
+                <span class="dream-shot" style="--r: 4deg"><img src="night%20series/ellecosplay2.jpg" alt="" loading="lazy"></span>
+              </span>
+            </span>
           </span>
         </button>
         <button class="gift-box" id="gift-box" type="button" aria-label="Open the present">
@@ -2025,6 +2224,12 @@
           </svg>
         </button>
         <span class="gift-hint" aria-hidden="true">tap to open ♡</span>
+      </div>
+      <div class="gift-msg" id="gift-msg" aria-live="polite" hidden>
+        <span class="msg-line">This is the last piece of the jigsaw for Korblox, I believe.</span>
+        <span class="msg-line">I love you from the bottom of my heart.</span>
+        <span class="msg-line">The future I'm looking forward to with you has never changed.</span>
+        <span class="msg-line">I'll reassure you again and again: I'll always be here for you.</span>
       </div>
       <div class="dive-content" id="dive-content">
         <h2 class="dive-title" id="dive-title">let's dive into the night</h2>
@@ -3589,12 +3794,55 @@
       e.stopPropagation(); // not another copy
       showPann();
     });
+    // Pointing at Pann's photo (or tapping it) projects what is on his mind
+    // out of his head, and it stays
+    const showDream = () => gift.classList.add("dream");
+    giftPann.addEventListener("pointerenter", showDream);
+    giftPann.addEventListener("click", e => {
+      e.stopPropagation(); // not another copy
+      showDream();
+    });
+    // Pann's note to Elle: beside the code when there is room on its right,
+    // otherwise across the top of the screen
+    const giftMsg = document.getElementById("gift-msg");
+    const placeMsg = () => {
+      const c = diveCard.getBoundingClientRect(), n = giftNote.getBoundingClientRect();
+      const room = c.right - 16 - (n.right + 14);
+      const beside = room >= 240;
+      giftMsg.dataset.side = beside ? "right" : "top";
+      Object.assign(giftMsg.style, beside
+        ? { left: `${n.right + 14 - c.left}px`, right: "auto", top: "auto", bottom: `${c.bottom - n.bottom}px`, width: `${Math.min(room, 320)}px` }
+        : { left: "16px", right: "16px", top: "16px", bottom: "auto", width: "auto" });
+    };
+    let msgShown = false;
+    const showMsg = () => {
+      if (msgShown) return;
+      msgShown = true;
+      // One span per word, so the words can come up one after another
+      let i = 0;
+      giftMsg.querySelectorAll(".msg-line").forEach(line => {
+        const words = line.textContent.trim().split(/\s+/);
+        line.textContent = "";
+        words.forEach((w, k) => {
+          const word = document.createElement("span");
+          word.className = "msg-word";
+          word.style.setProperty("--i", i++);
+          word.textContent = w;
+          line.append(word, k < words.length - 1 ? " " : "");
+        });
+      });
+      placeMsg();
+      giftMsg.hidden = false;
+      void giftMsg.offsetWidth;
+      giftMsg.classList.add("show");
+    };
+    window.addEventListener("resize", () => { if (msgShown) placeMsg(); });
     giftNote.addEventListener("click", () => {
       gift.classList.add("photo");
       copyText(giftCode.textContent).then(
         () => { giftCopied.textContent = "copied ♡"; },
         () => { giftCopied.textContent = "press and hold the code to copy"; }
-      );
+      ).then(() => setTimeout(showMsg, 600));
     });
 
     let dived = false;
