@@ -1172,6 +1172,15 @@
       font: 400 clamp(2rem, 6.5vw, 2.8rem) "Great Vibes", cursive;
       line-height: 1.2;
     }
+    /* A promise, quoted: pink like "Are you tired?" but smaller, as it's long */
+    .talk-promise {
+      max-width: 620px;
+      margin: 0;
+      color: #d6457a;
+      font: 400 clamp(1.7rem, 5.5vw, 2.3rem) "Great Vibes", cursive;
+      line-height: 1.3;
+      text-wrap: balance;
+    }
     .talk-text {
       max-width: 620px;
       margin: 0;
@@ -1343,7 +1352,7 @@
     }
     .ivory-screen .mode-back {
       border: 1px solid rgba(160, 130, 80, 0.3);
-      background: rgba(255, 255, 255, 0.6);
+      background: rgba(255, 253, 242, 0.95); /* solid enough for text scrolling under it */
       color: #8a6d3b;
     }
     .dive .mode-back {
@@ -2786,8 +2795,10 @@
       </div>
       <div class="quiz-step talk" id="talk-join" hidden>
         <p class="say talk-head">Darling, come join me</p>
-        <p class="say talk-text">I have to admit I was miserable, I cried a lot this whole month we were barely together, and I was tired. I hate myself that I couldn't do things right for you.</p>
+        <p class="say talk-text">I have to admit I was miserable. I cried a lot this whole month we were barely together. I was tired, and I was hurt, every day I missed you and I didn't know how to make it better. I hate myself that I couldn't do things right for you.</p>
         <p class="say talk-text">I haven't left the vc since you left. I blame myself when I pushed too far. I just couldn't stay in an environment like that darling, I'm sorry.</p>
+        <p class="say talk-text">Then you say “sama aq”, I know this is how you play but it still hurt, yet I still keep finding you. I made a promise:</p>
+        <p class="say talk-promise" data-pause="1200">“Even if you want me to go away, I'll still find a way to get back to you.”</p>
         <p class="say talk-text">Let's build them together, our moment.</p>
         <p class="say talk-ask">Let's start fresh, darling.</p>
         <a class="join-btn" id="join-btn" href="https://discord.gg/dYRvvcQ57" target="_blank" rel="noopener">join me ♡</a>
