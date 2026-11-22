@@ -759,6 +759,12 @@
     .dive.show {
       opacity: 1;
     }
+    /* Away on the pink page: hidden but still laid out, so the letter, the
+       photo rows and the gift stay as they were (display: none would restart
+       their animations) */
+    .dive.away {
+      visibility: hidden;
+    }
     .dive.expanding {
       background-color: rgba(12, 14, 46, 0);
       -webkit-backdrop-filter: blur(0);
@@ -770,6 +776,582 @@
     }
     body.night-only > :not(.dive) {
       display: none;
+    }
+    /* Two small buttons in the bottom-left corner: the moon dives into the
+       night, the flower into the ivory mode. They show once "For Elle" is gone. */
+    .mode-buttons {
+      position: fixed;
+      left: 16px;
+      bottom: 16px;
+      z-index: 600;
+      display: flex;
+      gap: 10px;
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(8px);
+      transition: opacity 0.5s ease, transform 0.5s ease, visibility 0.5s;
+    }
+    .mode-buttons.show {
+      opacity: 1;
+      visibility: visible;
+      transform: none;
+    }
+    .mode-btn,
+    .mode-back {
+      display: grid;
+      place-items: center;
+      width: 40px;
+      height: 40px;
+      padding: 0;
+      border-radius: 50%;
+      cursor: pointer;
+    }
+    .mode-btn {
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .mode-btn:hover {
+      transform: translateY(-2px) scale(1.06);
+    }
+    .mode-btn:focus-visible {
+      outline: 2px solid #c2185b;
+      outline-offset: 3px;
+    }
+    .mode-btn svg,
+    .mode-back svg {
+      width: 20px;
+      height: 20px;
+    }
+    .mode-btn.night {
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      background: radial-gradient(circle at 35% 30%, #1d3580, #0a1745 70%);
+      color: #f4f1ff;
+      box-shadow: 0 6px 16px rgba(10, 23, 69, 0.35), 0 0 12px rgba(140, 150, 255, 0.35);
+    }
+    .mode-btn.night:hover {
+      box-shadow: 0 8px 18px rgba(10, 23, 69, 0.4), 0 0 18px rgba(160, 170, 255, 0.6);
+    }
+    .mode-btn.ivory {
+      border: 1px solid rgba(194, 160, 100, 0.35);
+      background: #fffdf2;
+      box-shadow: 0 6px 16px rgba(194, 24, 91, 0.18);
+    }
+    .mode-btn.ivory:hover {
+      box-shadow: 0 8px 18px rgba(194, 24, 91, 0.25), 0 0 14px rgba(255, 240, 200, 0.9);
+    }
+    /* The ivory mode: grows out of its button as a circle until it covers
+       the page, and shrinks back into it on "back". Empty for now. */
+    .ivory-screen {
+      position: fixed;
+      inset: 0;
+      z-index: 1000;
+      background: #fffdf2;
+      clip-path: circle(0px at var(--ox, 36px) var(--oy, 100%));
+      transition: clip-path 0.9s cubic-bezier(0.65, 0, 0.35, 1);
+    }
+    .ivory-screen[hidden] {
+      display: none;
+    }
+    .ivory-screen.open {
+      clip-path: circle(var(--or, 150vmax) at var(--ox, 36px) var(--oy, 100%));
+    }
+    body.ivory-open {
+      overflow: hidden;
+    }
+    /* The question in the middle of the ivory screen. It comes up once the
+       screen has grown, and goes straight away on "back". */
+    .ivory-quiz {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      transform: translateY(14px);
+      transition: opacity 0.4s ease, transform 0.4s ease;
+    }
+    /* One step at a time: the "is that okay?" question, then the quiz */
+    .quiz-step {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 22px;
+      padding: 72px 16px;
+      text-align: center;
+      overflow-y: auto;
+    }
+    /* Centred, but scrolls from the top when it doesn't fit */
+    .quiz-step > :first-child {
+      margin-top: auto;
+    }
+    .quiz-step > :last-child {
+      margin-bottom: auto;
+    }
+    .quiz-step[hidden] {
+      display: none;
+    }
+    .ivory-screen.open .ivory-quiz {
+      opacity: 1;
+      transform: none;
+      transition: opacity 0.8s ease 0.6s, transform 0.8s cubic-bezier(0.2, 0.9, 0.3, 1.1) 0.6s;
+    }
+    .quiz-title {
+      margin: 0;
+      color: #7a5230;
+      font: 400 clamp(2.2rem, 7.5vw, 3.6rem) "Great Vibes", cursive;
+      line-height: 1.25;
+    }
+    .quiz-buttons {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 18px;
+      min-height: 3.4rem;
+    }
+    .quiz-btn {
+      position: relative;
+      box-sizing: border-box;
+      padding: 0.15em 1.3em;
+      border-radius: 999px;
+      font: 500 1.6rem "Caveat", cursive;
+      cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .quiz-btn:hover {
+      transform: translateY(-2px);
+    }
+    .quiz-btn:focus-visible {
+      outline: 2px solid #c9a96e;
+      outline-offset: 3px;
+    }
+    .quiz-btn.yes {
+      border: none;
+      color: #fff;
+      background: linear-gradient(135deg, #f4a7bf, #e2789d);
+      box-shadow: 0 6px 16px rgba(226, 120, 157, 0.35);
+    }
+    .quiz-btn.yes:hover {
+      box-shadow: 0 8px 22px rgba(226, 120, 157, 0.5);
+    }
+    .quiz-btn.no {
+      border: 1.5px solid #c9a96e;
+      color: #8a6d3b;
+      background: #fffaf0;
+    }
+    /* "No" breaking: a crack runs down it, then it falls apart in two halves */
+    .quiz-crack {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      overflow: visible;
+      pointer-events: none;
+    }
+    .quiz-crack polyline {
+      fill: none;
+      stroke: #8a6d3b;
+      stroke-width: 1.6;
+      stroke-linejoin: round;
+      vector-effect: non-scaling-stroke;
+    }
+    .quiz-shard {
+      position: absolute;
+      margin: 0;
+      pointer-events: none;
+    }
+    .quiz-chip {
+      position: absolute;
+      width: 5px;
+      height: 5px;
+      background: #c9a96e;
+      clip-path: polygon(50% 0, 100% 100%, 0 80%);
+      pointer-events: none;
+    }
+    /* What "No" turns into, for good */
+    .quiz-love {
+      color: #d6457a;
+      font: 400 clamp(2rem, 6.5vw, 2.6rem) "Great Vibes", cursive;
+      line-height: 1;
+      white-space: nowrap;
+      text-shadow: 0 2px 12px rgba(214, 69, 122, 0.2);
+    }
+    .quiz-heart {
+      position: absolute;
+      color: #e2789d;
+      line-height: 1;
+      pointer-events: none;
+    }
+    /* The quiz question and its four answers: two by two, or one under
+       another on a phone */
+    .quiz-question {
+      max-width: 760px;
+      margin: 0;
+      color: #7a5230;
+      font: 400 clamp(1.9rem, 6vw, 3rem) "Great Vibes", cursive;
+      line-height: 1.3;
+      text-wrap: balance;
+    }
+    .quiz-done {
+      margin: 0;
+      color: #7a5230;
+      font: 400 clamp(2.4rem, 8vw, 4.2rem) "Great Vibes", cursive;
+      line-height: 1.25;
+      text-wrap: balance;
+    }
+    /* "No" on the last question grows wings and flies off */
+    .quiz-btn.flying {
+      position: absolute;
+      margin: 0;
+      pointer-events: none;
+    }
+    .quiz-wing {
+      position: absolute;
+      top: -22px;
+      width: 48px;
+      height: 34px;
+      pointer-events: none;
+      filter: drop-shadow(0 2px 3px rgba(150, 115, 60, 0.3));
+    }
+    .quiz-wing.r {
+      left: calc(100% - 12px);
+    }
+    .quiz-wing.l {
+      right: calc(100% - 12px);
+      transform: scaleX(-1);
+    }
+    .quiz-wing svg {
+      display: block;
+      width: 100%;
+      height: 100%;
+      overflow: visible;
+      transform-origin: 0% 85%;
+      animation: wing-flap 0.3s ease-in-out infinite alternate;
+    }
+    .quiz-wing path {
+      fill: #fff;
+      stroke: #c9a96e;
+      stroke-width: 1.5;
+      stroke-linejoin: round;
+    }
+    .quiz-wing path.vein {
+      fill: none;
+      stroke-width: 0.9;
+    }
+    @keyframes wing-flap {
+      from { transform: rotate(18deg); }
+      to { transform: rotate(-30deg); }
+    }
+    /* The reasons: cards that open to show what each one means */
+    .quiz-hint {
+      margin: 0;
+      color: #a07c52;
+      font: 500 1.4rem "Caveat", cursive;
+    }
+    .reasons {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      width: min(560px, 100%);
+    }
+    .reason {
+      display: block;
+      box-sizing: border-box;
+      width: 100%;
+      padding: 0.6em 1.1em;
+      border: 1.5px solid #e6d3a8;
+      border-radius: 18px;
+      background: #fff;
+      color: #7a5230;
+      font: inherit;
+      text-align: left;
+      cursor: pointer;
+      box-shadow: 0 4px 14px rgba(201, 169, 110, 0.15);
+      transition: border-color 0.4s ease, box-shadow 0.4s ease, transform 0.2s ease;
+    }
+    .reason:not(.open):hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 18px rgba(201, 169, 110, 0.28);
+    }
+    .reason:focus-visible {
+      outline: 2px solid #c9a96e;
+      outline-offset: 3px;
+    }
+    .reason.open {
+      border-color: #f3b6c9;
+      box-shadow: 0 0 0 4px rgba(244, 167, 191, 0.18), 0 8px 20px rgba(226, 120, 157, 0.2);
+      cursor: default;
+    }
+    .reason-title {
+      display: flex;
+      align-items: baseline;
+      gap: 0.45em;
+      font: 500 1.55rem "Caveat", cursive;
+      line-height: 1.2;
+    }
+    .reason-title::before {
+      content: "♡";
+      flex: none;
+      color: #e2789d;
+    }
+    .reason.open .reason-title::before {
+      content: "♥";
+    }
+    /* Opens smoothly from nothing to its full height */
+    .reason-more {
+      display: grid;
+      grid-template-rows: 0fr;
+      transition: grid-template-rows 0.6s ease;
+    }
+    .reason.open .reason-more {
+      grid-template-rows: 1fr;
+    }
+    .reason-text {
+      display: block;
+      min-height: 0;
+      overflow: hidden;
+      padding-left: 1.75rem;
+      color: #8a6d3b;
+      font: 500 1.3rem "Caveat", cursive;
+      line-height: 1.3;
+      opacity: 0;
+      transition: opacity 0.6s ease 0.2s;
+    }
+    .reason-text > span {
+      display: block;
+      padding-top: 0.3em;
+    }
+    .reason.open .reason-text {
+      opacity: 1;
+    }
+    /* "next ›": keeps its place while hidden, so nothing moves when it shows */
+    .quiz-next {
+      padding: 0.2em 0.6em;
+      border: none;
+      background: none;
+      color: #a07c52;
+      font: 500 1.45rem "Caveat", cursive;
+      cursor: pointer;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.8s ease, visibility 0.8s, transform 0.2s ease, color 0.2s ease;
+    }
+    .quiz-next.show {
+      opacity: 1;
+      visibility: visible;
+    }
+    .quiz-next:hover {
+      color: #7a5230;
+      transform: translateX(3px);
+    }
+    .quiz-next:focus-visible {
+      outline: 2px solid #c9a96e;
+      outline-offset: 3px;
+      border-radius: 8px;
+    }
+    /* The last messages, a line at a time */
+    .talk {
+      gap: 16px;
+    }
+    .say {
+      opacity: 0;
+      transform: translateY(10px);
+      transition: opacity 1.2s ease, transform 1.2s ease;
+    }
+    .say.shown {
+      opacity: 1;
+      transform: none;
+    }
+    .talk-head {
+      margin: 0;
+      color: #7a5230;
+      font: 400 clamp(2.2rem, 7vw, 3.4rem) "Great Vibes", cursive;
+      line-height: 1.25;
+      text-wrap: balance;
+    }
+    .talk-ask {
+      margin: 0;
+      color: #d6457a;
+      font: 400 clamp(2rem, 6.5vw, 2.8rem) "Great Vibes", cursive;
+      line-height: 1.2;
+    }
+    .talk-text {
+      max-width: 620px;
+      margin: 0;
+      color: #7a5230;
+      font: 500 clamp(1.35rem, 4.2vw, 1.6rem) "Caveat", cursive;
+      line-height: 1.4;
+      text-wrap: pretty;
+    }
+    /* The Discord invite at the very end: the same pink as "Mhmmm", and it
+       keeps its place while hidden so nothing moves when it shows */
+    .join-btn {
+      margin-top: 8px;
+      padding: 0.2em 1.6em;
+      border-radius: 999px;
+      background: linear-gradient(135deg, #f4a7bf, #e2789d);
+      color: #fff;
+      font: 500 1.7rem "Caveat", cursive;
+      text-decoration: none;
+      box-shadow: 0 6px 16px rgba(226, 120, 157, 0.35);
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(10px);
+      transition: opacity 1s ease, visibility 1s, transform 0.6s ease, box-shadow 0.2s ease;
+    }
+    .join-btn.show {
+      opacity: 1;
+      visibility: visible;
+      transform: none;
+      animation: join-glow 2.4s ease-in-out 1s infinite;
+    }
+    .join-btn:hover {
+      box-shadow: 0 8px 24px rgba(226, 120, 157, 0.55);
+    }
+    .join-btn:focus-visible {
+      outline: 2px solid #c9a96e;
+      outline-offset: 3px;
+    }
+    @keyframes join-glow {
+      0%, 100% { box-shadow: 0 6px 16px rgba(226, 120, 157, 0.35); }
+      50% { box-shadow: 0 6px 16px rgba(226, 120, 157, 0.35), 0 0 0 8px rgba(244, 167, 191, 0.25); }
+    }
+    .quiz-board {
+      position: relative;
+      width: min(640px, 100%);
+    }
+    .quiz-choices {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+    /* The note that explains a right answer, with a little pointer: up at
+       the answers when it sits under them, left when it sits beside them */
+    .quiz-why {
+      position: relative;
+      box-sizing: border-box;
+      max-width: 420px;
+      margin: 18px auto 0;
+      padding: 0.6em 1em;
+      border: 1px solid #ecd9b0;
+      border-radius: 14px;
+      background: #fff;
+      color: #7a5230;
+      font: 500 1.3rem "Caveat", cursive;
+      line-height: 1.25;
+      text-align: left;
+      box-shadow: 0 8px 20px rgba(201, 169, 110, 0.22);
+    }
+    .quiz-why::before {
+      content: "♡";
+      margin-right: 0.35em;
+      color: #e2789d;
+    }
+    .quiz-why::after {
+      content: "";
+      position: absolute;
+      top: -7px;
+      left: 50%;
+      width: 12px;
+      height: 12px;
+      border-top: 1px solid #ecd9b0;
+      border-left: 1px solid #ecd9b0;
+      background: #fff;
+      transform: translateX(-50%) rotate(45deg);
+    }
+    .quiz-why.beside {
+      position: absolute;
+      left: calc(100% + 18px);
+      max-width: none;
+      margin: 0;
+    }
+    .quiz-why.beside::after {
+      top: 22px;
+      left: -7px;
+      transform: rotate(-45deg);
+    }
+    @media (max-width: 560px) {
+      .quiz-choices {
+        grid-template-columns: 1fr;
+      }
+    }
+    .quiz-choice {
+      box-sizing: border-box;
+      min-height: 3.4rem;
+      padding: 0.45em 1em;
+      border: 1.5px solid #d9c08f;
+      border-radius: 18px;
+      background: #fffaf0;
+      color: #7a5230;
+      font: 500 1.45rem "Caveat", cursive;
+      line-height: 1.15;
+      cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.4s ease, color 0.4s ease, opacity 0.4s ease;
+    }
+    .quiz-choice:not(:disabled):hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(201, 169, 110, 0.3);
+    }
+    .quiz-choice:focus-visible {
+      outline: 2px solid #c9a96e;
+      outline-offset: 3px;
+    }
+    .quiz-choice:disabled {
+      cursor: default;
+    }
+    /* A wrong answer turns into a pout */
+    .quiz-choice.pout {
+      border-color: #ecc4c4;
+      background: #fff4f2;
+      font-size: 2rem;
+      line-height: 1;
+    }
+    /* "Close" answers turn into a sweet reply instead */
+    .quiz-choice.close {
+      border-color: #f3b6c9;
+      background: #fff0f5;
+      color: #c2456f;
+      font-size: 1.3rem;
+    }
+    .quiz-choice.right {
+      border-color: transparent;
+      background: linear-gradient(135deg, #f4a7bf, #e2789d);
+      color: #fff;
+      box-shadow: 0 0 0 4px rgba(244, 167, 191, 0.25), 0 8px 22px rgba(226, 120, 157, 0.45);
+    }
+    /* Once it's answered, the answers not picked step back */
+    .quiz-choices.solved .quiz-choice:not(.right):not(.pout):not(.close) {
+      opacity: 0.45;
+    }
+    /* "back" arrow, top-left, in both modes */
+    .mode-back {
+      position: absolute;
+      top: 16px;
+      left: 16px;
+      z-index: 20;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.4s ease, visibility 0.4s, transform 0.2s ease;
+    }
+    .mode-back.show {
+      opacity: 1;
+      visibility: visible;
+    }
+    .mode-back:hover {
+      transform: translateX(-2px);
+    }
+    .mode-back:focus-visible {
+      outline: 2px solid currentColor;
+      outline-offset: 3px;
+    }
+    .ivory-screen .mode-back {
+      border: 1px solid rgba(160, 130, 80, 0.3);
+      background: rgba(255, 255, 255, 0.6);
+      color: #8a6d3b;
+    }
+    .dive .mode-back {
+      border: 1px solid rgba(255, 255, 255, 0.35);
+      background: rgba(10, 23, 69, 0.35);
+      color: #fff;
+      -webkit-backdrop-filter: blur(4px);
+      backdrop-filter: blur(4px);
     }
     .dive-card {
       --hills: min(24cqw, 28cqh);
@@ -798,6 +1380,10 @@
       transition: left 0.9s cubic-bezier(0.65, 0, 0.35, 1), top 0.9s cubic-bezier(0.65, 0, 0.35, 1),
         width 0.9s cubic-bezier(0.65, 0, 0.35, 1), height 0.9s cubic-bezier(0.65, 0, 0.35, 1),
         border-radius 0.9s ease, box-shadow 0.9s ease;
+    }
+    /* Once grown it stays full size, also while it fades out and back in */
+    .dive-card.grow {
+      transform: none;
     }
     .sky {
       position: absolute;
@@ -2135,6 +2721,79 @@
   <audio id="song" src="Mitski%20-%20My%20Love%20Mine%20All%20Mine%20(Official%20Lyric%20Video).mp3" loop preload="auto"></audio>
   <audio id="night-song" src="Ruth%20B.%20-%20Dandelions%20(Lyrics)%20%5B4k%5D.mp3" loop preload="none"></audio>  <div class="rain" id="rain" aria-hidden="true"></div>
   <button class="intro" id="intro">For Elle 💖</button>
+  <div class="mode-buttons" id="mode-buttons">
+    <button class="mode-btn night" id="mode-night" type="button" aria-label="Dive into the night">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M20.5 14.2A8.5 8.5 0 0 1 9.8 3.5a8.5 8.5 0 1 0 10.7 10.7z"/></svg>
+    </button>
+    <button class="mode-btn ivory" id="mode-ivory" type="button" aria-label="Dive into the ivory mode">
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <g fill="#e6c584">
+          <circle cx="12" cy="6.6" r="3.5"/>
+          <circle cx="17.1" cy="10.3" r="3.5"/>
+          <circle cx="15.2" cy="16.4" r="3.5"/>
+          <circle cx="8.8" cy="16.4" r="3.5"/>
+          <circle cx="6.9" cy="10.3" r="3.5"/>
+        </g>
+        <circle cx="12" cy="12" r="2.6" fill="#f28fb0"/>
+      </svg>
+    </button>
+  </div>
+  <audio id="ivory-song" src="Married%20Life%20(from%20Up)%20-%20Jacob%27s%20Piano.mp3" loop preload="none"></audio>
+  <div class="ivory-screen" id="ivory" hidden>
+    <button class="mode-back" id="ivory-back" type="button" aria-label="Back">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+    <div class="ivory-quiz">
+      <div class="quiz-step" id="quiz-intro">
+        <h2 class="quiz-title">Let's play some quiz with me<br>is that okay?</h2>
+        <div class="quiz-buttons">
+          <button class="quiz-btn yes" id="quiz-yes" type="button">Mhmmm</button>
+          <button class="quiz-btn no" id="quiz-no" type="button">No</button>
+        </div>
+      </div>
+      <!-- The quiz questions are added here from QUESTIONS in the script,
+           before the two steps below -->
+      <div class="quiz-step" id="quiz-done" hidden>
+        <p class="quiz-done">Quiz is done Elle, good job.</p>
+      </div>
+      <div class="quiz-step" id="quiz-love" hidden>
+        <h2 class="quiz-title">You wanna know the reason I love you?</h2>
+        <div class="quiz-buttons">
+          <button class="quiz-btn yes" id="love-yes" type="button">Mhmmmm</button>
+          <button class="quiz-btn no" id="love-no" type="button">No</button>
+        </div>
+      </div>
+      <div class="quiz-step" id="quiz-reasons" hidden>
+        <p class="quiz-hint">tap each one ♡</p>
+        <!-- One card per reason, added from REASONS in the script -->
+        <div class="reasons" id="reasons"></div>
+        <button class="quiz-next" id="reasons-next" type="button">next ›</button>
+      </div>
+      <!-- Pann's last words: each line fades in after the one before -->
+      <div class="quiz-step talk" id="talk-tired" hidden>
+        <p class="say talk-head">Elle, let me ask you something</p>
+        <p class="say talk-ask" data-pause="1500">Are you tired?</p>
+        <p class="say talk-text">You are a smart person, One thing you have to deal with is called a curse of knowledge, A person can only find peace if they are either Smartest or Dumbest, in the middle is like hell.</p>
+        <p class="say talk-text">Tell me okay? When you are tired.</p>
+        <p class="say talk-ask">Let me be beside you.</p>
+        <button class="quiz-next" id="tired-next" type="button">next ›</button>
+      </div>
+      <div class="quiz-step talk" id="talk-last" hidden>
+        <p class="say talk-head">Lastly, darling.</p>
+        <p class="say talk-text">Don't let anybody make you waver. You are perfect the way you are and I say this a lot because I mean it and I'm worried.</p>
+        <p class="say talk-text">When you make mistakes, remember darling you are just a human, Forgive yourself, Don't make anybody use the mistakes you made against you.</p>
+        <button class="quiz-next" id="last-next" type="button">next ›</button>
+      </div>
+      <div class="quiz-step talk" id="talk-join" hidden>
+        <p class="say talk-head">Darling, come join me</p>
+        <p class="say talk-text">I have to admit I was miserable, I cried a lot this whole month we were barely together, and I was tired. I hate myself that I couldn't do things right for you.</p>
+        <p class="say talk-text">I haven't left the vc since you left. I blame myself when I pushed too far. I just couldn't stay in an environment like that darling, I'm sorry.</p>
+        <p class="say talk-text">Let's build them together, our moment.</p>
+        <p class="say talk-ask">Let's start fresh, darling.</p>
+        <a class="join-btn" id="join-btn" href="https://discord.gg/dYRvvcQ57" target="_blank" rel="noopener">join me ♡</a>
+      </div>
+    </div>
+  </div>
   <div class="dive" id="dive" role="dialog" aria-modal="true" aria-labelledby="dive-title" hidden>
     <div class="dive-card" id="dive-card">
       <canvas class="sky" id="dive-sky" aria-hidden="true"></canvas>
@@ -2382,6 +3041,9 @@
         </div>
       </div>
     </div>
+    <button class="mode-back" id="night-back" type="button" aria-label="Back to the page">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
   </div>
   <script>
     // Discourage casual source viewing: block right-click and the
@@ -2470,12 +3132,12 @@
     const intro = document.getElementById("intro");
 
     let opened = false;
-    let openedAt = 0;
     const open = () => {
       if (opened) return;
       opened = true;
-      openedAt = performance.now();
       intro.classList.add("hidden");
+      // The moon and flower buttons come up once the opening screen is gone
+      setTimeout(() => document.getElementById("mode-buttons").classList.add("show"), 600);
       startRain();
     };
     // Skip the short silence at the start of the file
@@ -2940,8 +3602,8 @@
       }
     });
 
-    // After 30 seconds on the page (only counting while the tab is in view)
-    // a starry "let's dive into the night" popup appears. Each "No" makes
+    // The moon button in the bottom-left corner brings up a starry
+    // "let's dive into the night" popup. Each "No" makes
     // "Yes" bigger and "No" smaller until "No" fades away. "Yes" grows the
     // night sky to fill the screen and the page goes away; a second later a
     // tall card comes up under the stars to be opened and read.
@@ -2951,6 +3613,7 @@
     const diveYes = document.getElementById("dive-yes");
     const diveNo = document.getElementById("dive-no");
     const diveContent = document.getElementById("dive-content");
+    const nightBack = document.getElementById("night-back");
     const letterStage = document.getElementById("letter-stage");
     const letterFloat = document.getElementById("letter-float");
     const letter = document.getElementById("letter");
@@ -2967,6 +3630,10 @@
       color: TRAIL_COLORS[Math.floor(Math.random() * TRAIL_COLORS.length)]
     }));
     let skyRaf = 0, skyLast = 0, skyCenterY = 0.36, yesAt = 0;
+    // The night's own clock. It stops while she is away on the pink page,
+    // so the betta, the dance and the firework carry on where they were.
+    let awayMs = 0;
+    const nightNow = () => performance.now() - awayMs;
     // Stars speed up as the sky grows, then settle back to a slow turn
     const warpAt = t => {
       if (t < 0.5) return t / 0.5;
@@ -3061,7 +3728,8 @@
       }
       paintComets(ctx, W, H, dpr, now);
     };
-    const drawSkies = now => {
+    const drawSkies = real => {
+      const now = real - awayMs;
       const dt = Math.min((now - (skyLast || now)) / 1000, 0.05);
       skyLast = now;
       const warp = yesAt ? warpAt((now - yesAt) / 1000) : 0;
@@ -3262,7 +3930,7 @@
     };
     const startDance = () => {
       if (danceStart) return;
-      danceStart = performance.now();
+      danceStart = nightNow();
       withAudio(level => [659.25, 783.99, 987.77].forEach((f, i) => tone(f, i * 0.12, 1, 0.05 * level)));
     };
     couple.addEventListener("click", startDance);
@@ -3272,7 +3940,7 @@
         startDance();
       }
     });
-    updateCouple(performance.now());
+    updateCouple(nightNow());
 
     // The cats' names show on hover; on a phone a tap shows one for a moment
     document.querySelectorAll(".night-cat").forEach(cat => {
@@ -3284,17 +3952,6 @@
       });
     });
 
-    let seenMs = 0, seenLast = performance.now();
-    const diveTimer = setInterval(() => {
-      const now = performance.now();
-      if (!document.hidden) seenMs += Math.min(now - seenLast, 1000);
-      seenLast = now;
-      // Wait for the opening screen to be gone before showing it
-      if (seenMs >= 30000 && opened && now - openedAt > 1200) {
-        clearInterval(diveTimer);
-        showDive();
-      }
-    }, 250);
     // The page behind stays put while the popup is up
     ["wheel", "touchmove"].forEach(type =>
       dive.addEventListener(type, e => e.preventDefault(), { passive: false }));
@@ -3351,14 +4008,16 @@
       if (canFade) songFade = fadeVolume(song, volume.value / 100, 1500);
     };
     let nightSongReady = false, nightHasCome = false, nightSongOn = false;
+    let nightAway = false, nightFade = 0;
     const startNightSong = () => {
-      if (!nightSongReady || !nightHasCome || nightSongOn) return;
+      if (!nightSongReady || !nightHasCome || nightSongOn || nightAway) return;
       nightSongOn = true;
       nightSong.currentTime = NIGHT_SONG_START;
       nightSong.muted = false;
       if (!canFade) return;
       nightSong.volume = 0;
-      fadeVolume(nightSong, volume.value / 100, 3000);
+      clearInterval(nightFade);
+      nightFade = fadeVolume(nightSong, volume.value / 100, 3000);
     };
 
     // One firework, only on the first "I'm in a field of dandelions": a
@@ -3849,7 +4508,7 @@
     diveYes.addEventListener("click", () => {
       if (dived) return;
       dived = true;
-      yesAt = performance.now();
+      yesAt = nightNow();
       // Pin the card where it is, then let it grow to cover the whole screen
       const r = diveCard.getBoundingClientRect();
       diveCard.classList.add("grow");
@@ -3872,7 +4531,7 @@
         document.body.classList.add("night-only");
         diveContent.hidden = true;
         nightHasCome = true;
-        nightCameAt = performance.now();
+        nightCameAt = nightNow();
         // Without Dandelions there is no firework, so the present comes when
         // the rocket would have gone up
         setTimeout(() => { if (!nightSongOn) dropGift(); }, (BURST_AT - RISE - NIGHT_SONG_START) * 1000);
@@ -3880,6 +4539,7 @@
       }, 1050);
       setTimeout(() => {
         letterStage.hidden = false;
+        nightBack.classList.add("show");
         withAudio(level => [1318.5, 1568, 2093].forEach((f, i) => tone(f, i * 0.1, 1.2, 0.06 * level)));
       }, 2050);
     });
@@ -3979,6 +4639,649 @@
         }, 1100);
       });
     });
+
+    // The moon: the first time it brings up the "let's dive into the night"
+    // popup; after that it goes straight back into the night where she left it
+    const modeNight = document.getElementById("mode-night");
+    let scrollBeforeNight = 0, leaveTimer = 0, leftAt = 0;
+    modeNight.addEventListener("click", () => {
+      scrollBeforeNight = window.scrollY;
+      if (dived) resumeNight();
+      else if (dive.hidden) showDive();
+    });
+    // "back" in the night: the pink page comes back, Dandelions fades out and
+    // My Love Mine All Mine comes back in. The night stops where it is.
+    const leaveNight = () => {
+      if (nightAway) return;
+      nightAway = true;
+      nightBack.classList.remove("show");
+      document.body.classList.remove("night-only");
+      window.scrollTo(0, scrollBeforeNight);
+      dive.classList.remove("show");
+      clearInterval(nightFade);
+      if (nightSongOn && canFade) nightFade = fadeVolume(nightSong, 0, 900, () => nightSong.pause());
+      else nightSong.pause();
+      bringBackFirstSong();
+      leaveTimer = setTimeout(() => {
+        dive.classList.add("away");
+        cancelAnimationFrame(skyRaf);
+        skyRaf = 0;
+        leftAt = performance.now();
+      }, 600);
+      modeNight.focus({ preventScroll: true });
+    };
+    const resumeNight = () => {
+      if (!nightAway) return;
+      nightAway = false;
+      clearTimeout(leaveTimer);
+      if (leftAt) {
+        awayMs += performance.now() - leftAt;
+        leftAt = 0;
+      }
+      dive.classList.remove("away");
+      void dive.offsetWidth; // let the fade-in transition run
+      dive.classList.add("show");
+      if (!skyRaf) skyRaf = requestAnimationFrame(drawSkies);
+      clearInterval(nightFade);
+      if (nightSongOn) {
+        fadeOutFirstSong();
+        nightSong.play().catch(() => {});
+        if (canFade) nightFade = fadeVolume(nightSong, volume.value / 100, 1500);
+      } else if (nightSongReady) {
+        // Dandelions got ready while she was away
+        fadeOutFirstSong();
+        nightSong.play().then(startNightSong).catch(bringBackFirstSong);
+      }
+      // Without Dandelions, My Love Mine All Mine plays on in the night
+      setTimeout(() => {
+        if (nightAway) return;
+        document.body.classList.add("night-only");
+        nightBack.classList.add("show");
+        nightBack.focus({ preventScroll: true });
+      }, 600);
+    };
+    nightBack.addEventListener("click", leaveNight);
+
+    // The flower: a pale ivory screen grows out of the button to fill the
+    // page. Empty for now; "back" shrinks it into the button again.
+    const modeIvory = document.getElementById("mode-ivory");
+    const ivory = document.getElementById("ivory");
+    const ivoryBack = document.getElementById("ivory-back");
+    const GROW_MS = 900;
+    let ivoryTimer = 0, ivoryOpen = false;
+
+    // Married Life plays in the ivory mode: My Love Mine All Mine fades out as
+    // it fades in, and comes back on "back". Next time it carries on from
+    // where it stopped.
+    const ivorySong = document.getElementById("ivory-song");
+    const IVORY_SONG_START = 2.6; // skip the silence at the start
+    ivorySong.addEventListener("loadedmetadata", () => {
+      ivorySong.currentTime = IVORY_SONG_START;
+    }, { once: true });
+    let ivoryFade = 0;
+    const playIvorySong = () => {
+      clearInterval(ivoryFade);
+      if (canFade && ivorySong.paused) ivorySong.volume = 0;
+      ivorySong.play().then(() => {
+        if (!ivoryOpen) {
+          ivorySong.pause();
+          return;
+        }
+        fadeOutFirstSong();
+        if (canFade) ivoryFade = fadeVolume(ivorySong, volume.value / 100, 2000);
+      }).catch(() => {}); // if it can't play, My Love Mine All Mine plays on
+    };
+    const stopIvorySong = () => {
+      clearInterval(ivoryFade);
+      if (canFade && !ivorySong.paused) ivoryFade = fadeVolume(ivorySong, 0, 900, () => ivorySong.pause());
+      else ivorySong.pause();
+      bringBackFirstSong();
+    };
+    const setIvoryOrigin = () => {
+      const b = modeIvory.getBoundingClientRect();
+      const x = b.left + b.width / 2, y = b.top + b.height / 2;
+      const r = Math.hypot(Math.max(x, window.innerWidth - x), Math.max(y, window.innerHeight - y));
+      ivory.style.setProperty("--ox", `${x}px`);
+      ivory.style.setProperty("--oy", `${y}px`);
+      ivory.style.setProperty("--or", `${Math.ceil(r) + 2}px`);
+    };
+    modeIvory.addEventListener("click", () => {
+      if (ivoryOpen) return;
+      ivoryOpen = true;
+      clearTimeout(ivoryTimer);
+      setIvoryOrigin();
+      ivory.hidden = false;
+      void ivory.offsetWidth; // start from the closed circle
+      ivory.classList.add("open");
+      document.body.classList.add("ivory-open");
+      playIvorySong();
+      withAudio(level => [659.25, 880, 1174.66].forEach((f, i) => tone(f, i * 0.1, 1.2, 0.05 * level)));
+      ivoryTimer = setTimeout(() => {
+        ivoryBack.classList.add("show");
+        ivoryBack.focus({ preventScroll: true });
+      }, GROW_MS);
+    });
+    ivoryBack.addEventListener("click", () => {
+      if (!ivoryOpen) return;
+      ivoryOpen = false;
+      clearTimeout(ivoryTimer);
+      ivoryBack.classList.remove("show");
+      stopIvorySong();
+      setIvoryOrigin();
+      ivory.classList.remove("open");
+      ivoryTimer = setTimeout(() => {
+        ivory.hidden = true;
+        document.body.classList.remove("ivory-open");
+        modeIvory.focus({ preventScroll: true });
+      }, GROW_MS);
+    });
+
+    // The quiz question. Little hearts float up from a button
+    const quizYes = document.getElementById("quiz-yes");
+    const quizNo = document.getElementById("quiz-no");
+    const floatHearts = (el, count) => {
+      const r = el.getBoundingClientRect(), box = ivory.getBoundingClientRect();
+      for (let i = 0; i < count; i++) {
+        const h = document.createElement("span");
+        h.className = "quiz-heart";
+        h.textContent = "♥";
+        h.style.left = `${r.left - box.left + r.width * (0.2 + Math.random() * 0.6)}px`;
+        h.style.top = `${r.top - box.top + r.height * 0.3}px`;
+        h.style.fontSize = `${12 + Math.random() * 12}px`;
+        ivory.appendChild(h);
+        const dx = (Math.random() - 0.5) * 90, rise = 70 + Math.random() * 70;
+        h.animate([
+          { transform: "translate(-50%, 0) scale(0.4)", opacity: 0 },
+          { transform: `translate(calc(-50% + ${dx * 0.3}px), -${rise * 0.3}px) scale(1)`, opacity: 1, offset: 0.25 },
+          { transform: `translate(calc(-50% + ${dx}px), -${rise}px) scale(0.9)`, opacity: 0 }
+        ], { duration: 1300 + Math.random() * 500, delay: i * 70, easing: "ease-out", fill: "backwards" })
+          .finished.then(() => h.remove());
+      }
+    };
+    // The quiz, one question at a time. "right" marks the answer; a wrong
+    // answer turns into a pout, or into its "reply" when it has one.
+    const QUESTIONS = [
+      {
+        question: "Do you know why I fell in love with you at the first moment?",
+        choices: [
+          { text: "I saw you rich and want robux from you." },
+          { text: "You lit my world up", right: true },
+          { text: "I want your yen in Gakuran" },
+          { text: "I like moss hair color" }
+        ]
+      },
+      {
+        question: "Do you know what's the first thing I'm impressed about you?",
+        choices: [
+          { text: "You have moss hair color" },
+          { text: "I like your uniform" },
+          { text: "Your laugh(Nyahahahaha)", right: true },
+          { text: "The way you move your character", reply: "This is quite close, I found it cute" }
+        ]
+      },
+      {
+        question: "You know what I see in you in the night we met?",
+        choices: [
+          { text: "You actually wanted milk" },
+          { text: "You just want to fight and smack people face" },
+          { text: "You are lonely", reply: "not entirely" },
+          { text: "I see an innocent girl, miserable seems like she's tired from many things and deep down lonely", right: true }
+        ]
+      },
+      {
+        question: "How about the 1st thing you made me feel kilig?",
+        choices: [
+          {
+            text: "You told me you teach people how to use AI with just this age also and you mentioned Chernobyl which made my eye lit up even more.",
+            right: true,
+            why: "After I mentioned Boris Cherny and Andrej Karpathy, you mentioned Chernobyl."
+          },
+          { text: "You had to carry my body 6 times after I lost my fights" },
+          { text: "You use kure, which has so much aura" },
+          { text: "Moss hair color" }
+        ]
+      }
+    ];
+    const quizBox = ivory.querySelector(".ivory-quiz");
+    const quizIntro = document.getElementById("quiz-intro");
+    const questionSteps = QUESTIONS.map((item, n) => {
+      const step = document.createElement("div");
+      step.className = "quiz-step";
+      step.hidden = true;
+      const title = document.createElement("h2");
+      title.className = "quiz-question";
+      title.textContent = item.question;
+      const list = document.createElement("div");
+      list.className = "quiz-choices";
+      item.choices.forEach(c => {
+        const choice = document.createElement("button");
+        choice.type = "button";
+        choice.className = "quiz-choice";
+        choice.textContent = c.text;
+        choice.addEventListener("click", () => answer(n, list, choice, c));
+        list.appendChild(choice);
+      });
+      // The answers sit on a board, so a note can go beside them
+      const board = document.createElement("div");
+      board.className = "quiz-board";
+      board.appendChild(list);
+      step.append(title, board);
+      quizBox.appendChild(step);
+      return step;
+    });
+
+    // After the last question: "Quiz is done", then "the reason I love you"
+    const quizDone = document.getElementById("quiz-done");
+    const quizLove = document.getElementById("quiz-love");
+    const quizReasons = document.getElementById("quiz-reasons");
+    const talkTired = document.getElementById("talk-tired");
+    const talkLast = document.getElementById("talk-last");
+    const talkJoin = document.getElementById("talk-join");
+    quizBox.append(quizDone, quizLove, quizReasons, talkTired, talkLast, talkJoin);
+
+    // One step fades away, then the next slowly comes up in its place,
+    // its buttons one after another. Resolves once the next one is showing.
+    const nextStep = (from, to, delay) => from.animate([
+      { opacity: 1, transform: "none" },
+      { opacity: 0, transform: "translateY(-12px)" }
+    ], { duration: 900, delay, easing: "ease-in-out", fill: "forwards" }).finished.then(() => {
+      from.hidden = true;
+      to.hidden = false;
+      const head = to.querySelector(".quiz-question, .quiz-title, .quiz-done, .quiz-hint");
+      if (head) head.animate([
+        { opacity: 0, transform: "translateY(16px)" },
+        { opacity: 1, transform: "none" }
+      ], { duration: 1600, easing: "ease-out", fill: "backwards" });
+      to.querySelectorAll(".quiz-choice, .quiz-btn, .reason").forEach((c, i) => c.animate([
+        { opacity: 0, transform: "translateY(12px)" },
+        { opacity: 1, transform: "none" }
+      ], { duration: 900, delay: 1300 + i * 350, easing: "ease-out", fill: "backwards" }));
+    });
+
+    // "Mhmmm": hearts, then the first question
+    let quizStarted = false;
+    quizYes.addEventListener("click", () => {
+      if (quizStarted) return;
+      quizStarted = true;
+      quizYes.animate([
+        { transform: "scale(1)" }, { transform: "scale(1.12)" }, { transform: "scale(1)" }
+      ], { duration: 350, easing: "ease-out" });
+      floatHearts(quizYes, 8);
+      withAudio(level => [783.99, 987.77, 1318.5].forEach((f, i) => tone(f, i * 0.09, 1, 0.05 * level)));
+      nextStep(quizIntro, questionSteps[0], 700);
+    });
+
+    // Mini hearts floating up from the bottom of the screen, swaying a little
+    const HEART_PINKS = ["#e2789d", "#f4a7bf", "#d6457a", "#f7c1d1"];
+    const heartRain = () => {
+      const box = ivory.getBoundingClientRect();
+      const count = Math.round(Math.min(Math.max(box.width / 28, 18), 44));
+      for (let i = 0; i < count; i++) {
+        const h = document.createElement("span");
+        h.className = "quiz-heart";
+        h.textContent = "♥";
+        h.style.left = `${Math.random() * 100}%`;
+        h.style.top = "100%";
+        h.style.fontSize = `${9 + Math.random() * 11}px`;
+        h.style.color = HEART_PINKS[i % HEART_PINKS.length];
+        ivory.appendChild(h);
+        const rise = box.height * (0.7 + Math.random() * 0.45), sway = 10 + Math.random() * 22;
+        const side = Math.random() < 0.5 ? -1 : 1;
+        h.animate([
+          { transform: "translate(0, 0)", opacity: 0 },
+          { transform: `translate(${side * sway}px, -${rise * 0.25}px)`, opacity: 0.9, offset: 0.2 },
+          { transform: `translate(${-side * sway}px, -${rise * 0.6}px)`, opacity: 0.8, offset: 0.6 },
+          { transform: `translate(${side * sway * 0.5}px, -${rise}px)`, opacity: 0 }
+        ], { duration: 2800 + Math.random() * 1800, delay: Math.random() * 1600, easing: "ease-out", fill: "backwards" })
+          .finished.then(() => h.remove());
+      }
+    };
+
+    // A right answer with a "why" gets a little note explaining it: beside
+    // the answers when there is room, under them otherwise
+    const placeWhy = (board, choice, note) => {
+      const b = board.getBoundingClientRect();
+      if (!b.width) return; // the ivory screen is closed
+      const room = window.innerWidth - b.right - 18 - 16;
+      const beside = room >= 200;
+      note.classList.toggle("beside", beside);
+      note.style.width = beside ? `${Math.min(room, 300)}px` : "";
+      note.style.top = beside ? `${choice.offsetTop}px` : "";
+    };
+    const showWhy = (board, choice, text) => {
+      const note = document.createElement("p");
+      note.className = "quiz-why";
+      note.textContent = text;
+      board.appendChild(note);
+      placeWhy(board, choice, note);
+      note.animate([
+        { opacity: 0, transform: "translateY(8px)" },
+        { opacity: 1, transform: "none" }
+      ], { duration: 900, easing: "ease-out", fill: "backwards" });
+      // Under the answers on a small screen it may sit below the bottom
+      // edge: scroll the quiz (not the page behind it) to bring it up
+      const step = board.closest(".quiz-step");
+      if (!note.classList.contains("beside") && step.scrollHeight > step.clientHeight) {
+        step.scrollTo({ top: step.scrollHeight, behavior: "smooth" });
+      }
+      window.addEventListener("resize", () => placeWhy(board, choice, note));
+      modeIvory.addEventListener("click", () => setTimeout(() => placeWhy(board, choice, note), 50));
+    };
+
+    // The right answer lights up and hearts float up the screen, then the
+    // next question comes. A wrong one shakes and turns into a pout (or its
+    // reply) and can't be picked again.
+    const answer = (n, list, choice, c) => {
+      if (list.classList.contains("solved") || choice.disabled) return;
+      if (c.right) {
+        choice.classList.add("right");
+        list.classList.add("solved");
+        list.querySelectorAll(".quiz-choice").forEach(other => { if (other !== choice) other.disabled = true; });
+        choice.animate([
+          { transform: "scale(1)" }, { transform: "scale(1.08)" }, { transform: "scale(1)" }
+        ], { duration: 450, easing: "ease-out" });
+        floatHearts(choice, 14);
+        heartRain();
+        withAudio(level => [1046.5, 1318.5, 1568, 2093, 2637].forEach((f, i) => tone(f, i * 0.08, 1.3, 0.05 * level)));
+        if (c.why) setTimeout(() => showWhy(list.parentElement, choice, c.why), 700);
+        const wait = c.why ? 7000 : 2400;
+        if (questionSteps[n + 1]) {
+          nextStep(questionSteps[n], questionSteps[n + 1], wait);
+        } else {
+          // That was the last one: "Quiz is done", then the last question
+          nextStep(questionSteps[n], quizDone, wait).then(() => {
+            heartRain();
+            withAudio(level => [783.99, 1046.5, 1318.5, 1568, 2093].forEach((f, i) => tone(f, 0.3 + i * 0.12, 1.4, 0.05 * level)));
+            return nextStep(quizDone, quizLove, 3800);
+          }).then(() => setTimeout(() => { noReady = true; }, 2700));
+        }
+        return;
+      }
+      choice.disabled = true;
+      choice.setAttribute("aria-label", `${c.text} (${c.reply ? "close" : "wrong"})`);
+      choice.style.minHeight = `${choice.offsetHeight}px`; // keep its size
+      choice.animate([
+        { transform: "translateX(0)" }, { transform: "translateX(-5px)" }, { transform: "translateX(5px)" },
+        { transform: "translateX(-3px)" }, { transform: "translateX(0)" }
+      ], { duration: 300 }).finished.then(() => {
+        choice.textContent = c.reply || "😤";
+        choice.classList.add(c.reply ? "close" : "pout");
+        choice.animate([
+          { transform: "scale(0.6)" }, { transform: "scale(1.12)", offset: 0.7 }, { transform: "scale(1)" }
+        ], { duration: 450, easing: "ease-out" });
+      });
+      withAudio(level => {
+        if (c.reply) {
+          // close: a soft little "hm?" going up
+          tone(523.25, 0, 0.25, 0.05 * level, "triangle");
+          tone(659.25, 0.14, 0.4, 0.05 * level, "triangle");
+        } else {
+          tone(392, 0, 0.25, 0.06 * level, "triangle");
+          tone(311.13, 0.16, 0.35, 0.06 * level, "triangle");
+        }
+      });
+    };
+
+    // "No": a crack runs down it, it shakes, breaks in two and the halves
+    // fall away; "i love you" is left in its place and stays that way
+    const CRACK = [[50, 0], [44, 30], [56, 52], [46, 76], [52, 100]];
+    const pct = pts => pts.map(([x, y]) => `${x}% ${y}%`).join(", ");
+    const HALVES = [
+      pct([[0, 0], ...CRACK, [0, 100]]),
+      pct([[100, 0], [100, 100], ...CRACK.slice().reverse()])
+    ];
+    let quizBroken = false;
+    quizNo.addEventListener("click", () => {
+      if (quizBroken) return;
+      quizBroken = true;
+      const crack = document.createElementNS(SVG_NS, "svg");
+      crack.setAttribute("class", "quiz-crack");
+      crack.setAttribute("viewBox", "0 0 100 100");
+      crack.setAttribute("preserveAspectRatio", "none");
+      crack.setAttribute("aria-hidden", "true");
+      const line = document.createElementNS(SVG_NS, "polyline");
+      line.setAttribute("points", CRACK.map(p => p.join(",")).join(" "));
+      line.setAttribute("pathLength", "100");
+      crack.appendChild(line);
+      quizNo.appendChild(crack);
+      line.animate([{ strokeDasharray: "100", strokeDashoffset: "100" }, { strokeDasharray: "100", strokeDashoffset: "0" }],
+        { duration: 220, easing: "ease-in", fill: "forwards" });
+      quizNo.animate([
+        { transform: "translateX(0)" }, { transform: "translateX(-3px) rotate(-2deg)" },
+        { transform: "translateX(3px) rotate(2deg)" }, { transform: "translateX(-2px)" }, { transform: "translateX(0)" }
+      ], { duration: 260, delay: 140 });
+      withAudio(level => {
+        tone(2637, 0, 0.12, 0.05 * level, "triangle");
+        tone(3520, 0.05, 0.1, 0.03 * level, "triangle");
+      });
+      setTimeout(breakNo, 420);
+    });
+    const breakNo = () => {
+      const r = quizNo.getBoundingClientRect(), box = ivory.getBoundingClientRect();
+      const x = r.left - box.left, y = r.top - box.top;
+      // The two halves, drawn over where the button was
+      HALVES.forEach((poly, i) => {
+        const half = quizNo.cloneNode(true);
+        half.removeAttribute("id");
+        half.setAttribute("aria-hidden", "true");
+        half.tabIndex = -1;
+        half.classList.add("quiz-shard");
+        Object.assign(half.style, { left: `${x}px`, top: `${y}px`, width: `${r.width}px`, height: `${r.height}px`, clipPath: `polygon(${poly})` });
+        ivory.appendChild(half);
+        const dir = i ? 1 : -1;
+        half.animate([
+          { transform: "none", opacity: 1 },
+          { transform: `translate(${dir * 8}px, 4px) rotate(${dir * 6}deg)`, opacity: 1, offset: 0.15 },
+          { transform: `translate(${dir * 34}px, 90px) rotate(${dir * 32}deg)`, opacity: 0 }
+        ], { duration: 950, easing: "cubic-bezier(0.45, 0, 0.9, 0.6)", fill: "forwards" })
+          .finished.then(() => half.remove());
+      });
+      // Small chips flying off the crack
+      for (let i = 0; i < 9; i++) {
+        const chip = document.createElement("span");
+        chip.className = "quiz-chip";
+        chip.style.left = `${x + r.width * 0.5}px`;
+        chip.style.top = `${y + r.height * (0.15 + Math.random() * 0.7)}px`;
+        ivory.appendChild(chip);
+        const a = Math.random() * Math.PI * 2, d = 20 + Math.random() * 40;
+        chip.animate([
+          { transform: "translate(0, 0) rotate(0deg)", opacity: 1 },
+          { transform: `translate(${Math.cos(a) * d}px, ${Math.sin(a) * d + 30}px) rotate(${Math.random() * 360}deg)`, opacity: 0 }
+        ], { duration: 600 + Math.random() * 300, easing: "ease-out", fill: "forwards" })
+          .finished.then(() => chip.remove());
+      }
+      // The words that take its place
+      const love = document.createElement("span");
+      love.className = "quiz-love";
+      love.textContent = "i love you";
+      quizNo.replaceWith(love);
+      quizYes.focus({ preventScroll: true });
+      love.animate([
+        { opacity: 0, transform: "scale(0.5)" },
+        { opacity: 1, transform: "scale(1.1)", offset: 0.7 },
+        { opacity: 1, transform: "scale(1)" }
+      ], { duration: 750, delay: 380, easing: "ease-out", fill: "backwards" });
+      setTimeout(() => {
+        floatHearts(love, 10);
+        withAudio(level => [1046.5, 1318.5, 1568, 2093].forEach((f, i) => tone(f, i * 0.1, 1.3, 0.05 * level)));
+      }, 600);
+    };
+
+    // "You wanna know the reason I love you?" "Mhmmmm" gets hearts. "No"
+    // can't be pressed: as soon as the pointer comes near it (or a finger
+    // touches it) it sprouts wings and flutters off the screen, and the gap
+    // it leaves closes up so "Mhmmmm" is left in the middle.
+    const loveYes = document.getElementById("love-yes");
+    const loveNo = document.getElementById("love-no");
+    let reasonsShown = false;
+    loveYes.addEventListener("click", () => {
+      if (reasonsShown) return;
+      reasonsShown = true;
+      loveYes.animate([
+        { transform: "scale(1)" }, { transform: "scale(1.12)" }, { transform: "scale(1)" }
+      ], { duration: 350, easing: "ease-out" });
+      floatHearts(loveYes, 10);
+      withAudio(level => [783.99, 987.77, 1318.5].forEach((f, i) => tone(f, i * 0.09, 1, 0.05 * level)));
+      nextStep(quizLove, quizReasons, 700);
+    });
+
+    // The reasons. Each card opens to show what it means, and stays open.
+    const REASONS = [
+      {
+        title: "I love how honest you are with your own feelings",
+        text: "You always say it out loud how you feel, and you were right first step is always feel your feelings."
+      },
+      {
+        title: "Your soul is pure and bright",
+        text: "Whatever you do, you act based from your experience and knowledge and what even makes you special is you care about emotion also."
+      },
+      {
+        title: "You are clingy",
+        text: "You always casually say I love you, draws me heart and always ask for kiss."
+      },
+      {
+        title: "Smart and learn fast",
+        text: "You always made me proud when I teach you something, you learn fast and you got them right. And also about what you said “Every small problem could be a bigger one in the future” You are very smart for saying that."
+      }
+    ];
+    const reasonList = document.getElementById("reasons");
+    REASONS.forEach(reason => {
+      const card = document.createElement("button");
+      card.type = "button";
+      card.className = "reason";
+      card.setAttribute("aria-expanded", "false");
+      const title = document.createElement("span");
+      title.className = "reason-title";
+      title.textContent = reason.title;
+      const more = document.createElement("span");
+      more.className = "reason-more";
+      const text = document.createElement("span");
+      text.className = "reason-text";
+      const words = document.createElement("span");
+      words.textContent = reason.text;
+      text.appendChild(words);
+      more.appendChild(text);
+      card.append(title, more);
+      card.addEventListener("click", () => {
+        if (card.classList.contains("open")) return;
+        card.classList.add("open");
+        card.setAttribute("aria-expanded", "true");
+        floatHearts(card, 6);
+        withAudio(level => [880, 1108.73, 1318.5].forEach((f, i) => tone(f, i * 0.1, 1.1, 0.045 * level)));
+        // Once open, bring it into view if it now runs past the bottom
+        setTimeout(() => keepInView(quizReasons, card), 650);
+        // All four read: "next ›" comes up
+        if (reasonList.querySelectorAll(".reason.open").length === REASONS.length) {
+          setTimeout(() => {
+            reasonsNext.classList.add("show");
+            keepInView(quizReasons, reasonsNext);
+          }, 1800);
+        }
+      });
+      reasonList.appendChild(card);
+    });
+
+    // Scroll a step (not the page behind it) so this is above its bottom edge
+    const keepInView = (step, el) => {
+      const s = step.getBoundingClientRect(), r = el.getBoundingClientRect();
+      const over = r.bottom - (s.bottom - 16);
+      if (over > 0) step.scrollBy({ top: over, behavior: "smooth" });
+    };
+
+    // The last messages: each line fades in, the next one after enough time
+    // to read it, and "next ›" (if there is one) comes up at the end
+    const readTime = line => Math.min(1400 + line.textContent.length * 45, 7000) + Number(line.dataset.pause || 0);
+    const revealLines = step => new Promise(resolve => {
+      const lines = [...step.querySelectorAll(".say")];
+      let i = 0;
+      const showNext = () => {
+        const line = lines[i++];
+        line.classList.add("shown");
+        keepInView(step, line);
+        if (i < lines.length) setTimeout(showNext, readTime(line));
+        else setTimeout(resolve, 1400);
+      };
+      showNext();
+    });
+    const goOn = (button, from, to, then) => button.addEventListener("click", () => {
+      if (button.disabled) return;
+      button.disabled = true;
+      withAudio(level => [659.25, 880].forEach((f, i) => tone(f, i * 0.1, 1, 0.045 * level)));
+      nextStep(from, to, 150).then(() => revealLines(to)).then(then);
+    });
+    const reasonsNext = document.getElementById("reasons-next");
+    const tiredNext = document.getElementById("tired-next");
+    goOn(reasonsNext, quizReasons, talkTired, () => {
+      tiredNext.classList.add("show");
+      keepInView(talkTired, tiredNext);
+    });
+    const lastNext = document.getElementById("last-next");
+    goOn(tiredNext, talkTired, talkLast, () => {
+      lastNext.classList.add("show");
+      keepInView(talkLast, lastNext);
+    });
+    // The very end: once the last line is there, hearts float up and the
+    // Discord invite comes up
+    const joinBtn = document.getElementById("join-btn");
+    goOn(lastNext, talkLast, talkJoin, () => {
+      joinBtn.classList.add("show");
+      keepInView(talkJoin, joinBtn);
+      heartRain();
+      withAudio(level => [523.25, 659.25, 783.99, 1046.5, 1318.5].forEach((f, i) => tone(f, i * 0.15, 1.6, 0.045 * level)));
+    });
+    const WING = `<svg viewBox="0 0 40 28" aria-hidden="true">
+      <path d="M2 22 C6 10 18 2 38 1 C34 6 35 8 30 9 C35 12 31 14 26 14 C30 17 25 19 20 18 C21 22 14 23 10 21 C8 24 4 24 2 22 Z"/>
+      <path class="vein" d="M7 18 C14 12 22 7 33 4"/>
+    </svg>`;
+    // Only once it has finished coming up, so she gets to see it first
+    let noFlown = false, noReady = false;
+    const flyAway = () => {
+      if (noFlown || !noReady) return;
+      noFlown = true;
+      const r = loveNo.getBoundingClientRect(), box = ivory.getBoundingClientRect();
+      const bird = loveNo.cloneNode(true);
+      bird.removeAttribute("id");
+      bird.setAttribute("aria-hidden", "true");
+      bird.tabIndex = -1;
+      bird.classList.add("flying");
+      Object.assign(bird.style, { left: `${r.left - box.left}px`, top: `${r.top - box.top}px`, width: `${r.width}px`, height: `${r.height}px` });
+      ["l", "r"].forEach(side => {
+        const wing = document.createElement("span");
+        wing.className = `quiz-wing ${side}`;
+        wing.innerHTML = WING;
+        bird.appendChild(wing);
+        wing.animate([{ scale: "0", opacity: 0 }, { scale: "1", opacity: 1 }],
+          { duration: 450, easing: "cubic-bezier(0.2, 0.9, 0.3, 1.3)", fill: "backwards" });
+      });
+      ivory.appendChild(bird);
+      // The space it leaves closes up
+      const hadFocus = document.activeElement === loveNo;
+      const gap = document.createElement("span");
+      Object.assign(gap.style, { width: `${r.width}px`, height: "1px", flex: "none" });
+      loveNo.replaceWith(gap);
+      if (hadFocus) loveYes.focus({ preventScroll: true });
+      gap.animate([{ width: `${r.width}px`, marginLeft: "0px" }, { width: "0px", marginLeft: "-18px" }],
+        { duration: 900, delay: 1200, easing: "ease-in-out", fill: "forwards" }).finished.then(() => gap.remove());
+      // A little hop while the wings come out, then a lazy wavy flight up
+      // and off to one side
+      const side = Math.random() < 0.5 ? -1 : 1;
+      const dx = side * box.width * (0.25 + Math.random() * 0.2);
+      const dy = -(r.bottom - box.top + 120);
+      const flight = [];
+      for (let k = 0; k <= 30; k++) {
+        const t = k / 30;
+        const x = dx * Math.pow(t, 1.4) + Math.sin(t * Math.PI * 3) * 16;
+        const y = -8 + dy * Math.pow(t, 1.25) + Math.sin(t * Math.PI * 6) * 5;
+        const rot = Math.sin(t * Math.PI * 3) * 7;
+        flight.push({ transform: `translate(${x}px, ${y}px) rotate(${rot}deg)` });
+      }
+      bird.animate([{ transform: "translate(0, 0)" }, { transform: "translate(0, -8px)" }],
+        { duration: 600, easing: "ease-out", fill: "forwards" }).finished.then(() =>
+        bird.animate(flight, { duration: 4500, easing: "ease-in", fill: "forwards" }).finished)
+        .then(() => bird.remove());
+      withAudio(level => [1318.5, 1568, 1760, 2093].forEach((f, i) => tone(f, i * 0.06, 0.25, 0.03 * level, "triangle")));
+    };
+    ["pointerenter", "pointermove", "pointerdown", "focus", "click"].forEach(type => loveNo.addEventListener(type, flyAway));
 
     window.addEventListener("load", () => {
       gallery.querySelectorAll(".track").forEach(setTrackSpeed);
